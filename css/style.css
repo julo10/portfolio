@@ -1,3 +1,4 @@
+/* Junicode */
 @font-face {
   font-family: "Junicode";
   src: url("../fonts/Junicode.ttf") format("truetype");
@@ -6,12 +7,55 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Junicode";
+  src: url("../fonts/Junicode-Bold.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Junicode";
+  src: url("../fonts/Junicode-Italic.ttf") format("truetype");
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Junicode";
+  src: url("../fonts/Junicode-BoldItalic.ttf") format("truetype");
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* Instrument Sans */
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("../fonts/InstrumentSans-VariableFont.ttf") format("truetype-variations");
+  font-style: normal;
+  font-weight: 100 900;   /* variable range, not a single value */
+  font-stretch: 25% 151%; /* adjust to match the font's actual wdth axis range */
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("../fonts/InstrumentSans-Italic-VariableFont.ttf") format("truetype-variations");
+  font-style: italic;
+  font-weight: 100 900;
+  font-stretch: 25% 151%;
+  font-display: swap;
+}
+
 :root {
   --bg: #d2d2d2;
   --ink: #111;
   --line: #777;
-  --sans: "Junicode", sans-serif;
   --serif: "Junicode", serif;
+  --sans: "Instrument Sans", sans-serif;
   --page-pad: clamp(20px, 5vw, 72px);
 }
 
@@ -20,10 +64,13 @@
 html { scroll-behavior: smooth; }
 
 body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--sans);
+  font-family: var(--serif);
   font-size: 24px;
   line-height: 1.25;
   letter-spacing: -3%;
@@ -36,7 +83,7 @@ a {
 }
 
 .site-header {
-  height: 38px;
+  height: 48px;
   margin: 0 var(--page-pad);
   border-bottom: 1px solid var(--line);
   display: flex;
@@ -49,13 +96,15 @@ a {
 }
 
 .wordmark {
+  font-family: var(--sans);
   font-weight: 700;
-  font-size: 13px;
+  font-size: 30px;
 }
 
 nav {
   display: flex;
   gap: 34px;
+  font-family: Instrument Sans, sans-serif;
 }
 
 nav a:hover,
@@ -123,6 +172,11 @@ main {
 }
 
 .section-label {
+  font-family: var(--sans);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  /*-padding-top: 12px;*/
   margin-bottom: 68px;
 }
 
@@ -132,9 +186,11 @@ main {
 
 .project-images {
   display: grid;
-  grid-template-columns: 1.05fr .95fr .55fr;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr) minmax(0, .55fr);
   gap: 10px;
   align-items: stretch;
+  width: 100%;
+  max-width: 100%;
 }
 
 .project-images img,
@@ -163,36 +219,69 @@ main {
 }
 
 .project-info {
+  font-family: var(--sans);
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 10px;
   padding-top: 12px;
 }
 
 .project-info > div:first-child {
+  font-family: var(--sans);
   display: grid;
-  grid-template-columns: 45px 1fr;
-  column-gap: 6px;
-  align-content: start;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: start;
+}
+
+.project-info > div:first-child span:first-child {
+  font-family: var(--sans);
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  white-space: nowrap;
+}
+
+.project-info > div:first-child strong {
+  font-family: var(--serif);
+  font-size: 42px;
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  display: block;
+  line-height: 1.1;
 }
 
 .project-info > div:first-child span:last-child {
+  font-family: var(--sans);
   grid-column: 2;
+  grid-row: 2;
+  min-width: 0;
+  display: block;
+  line-height: 1.1;
 }
 
 .project-info strong { font-weight: 700; }
 
 .project-description {
-  max-width: 360px;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 48px;
+  line-height: 1.1;
+  /*max-width: 520px;*/
 }
 
 .project-description p {
   margin: 0 0 24px;
 }
 
-.project-description a { color: #666; }
+.project-description a { color: #666; 
+  font-family: var(--sans);
+  font-size: 32px;   
+  color: #666;
+}
 
 footer {
+  font-family: var(--sans);
   border-top: 1px solid var(--line);
   margin: 0 var(--page-pad);
   padding: 18px 0 60px;
@@ -203,31 +292,50 @@ footer {
 
 footer p { margin: 0 0 10px; }
 
+footer a:hover {
+  text-decoration: underline;
+}
+
 .footer-mark {
+  font-family: var(--sans);
   font-size: 28px;
   font-weight: 700;
 }
 
 @media (max-width: 900px) {
-  :root { --page-pad: 28px; }
-
-  .intro h1 { font-size: clamp(40px, 6vw, 58px); }
-
-  .project-images {
-    grid-template-columns: 1fr 1fr;
+  :root {
+    --page-pad: 28px;
   }
 
-  .project-letter { display: none; }
+  .intro h1 {
+    font-size: clamp(40px, 6vw, 58px);
+  }
+
+  .project-images {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .project-letter {
+    display: none;
+  }
+
+  .project-info {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 600px) {
-  :root { --page-pad: 14px; }
+  :root {
+    --page-pad: 14px;
+  }
 
   .site-header {
     height: 34px;
   }
 
-  nav { display: none; }
+  nav {
+    display: none;
+  }
 
   .menu-button {
     display: block;
@@ -237,22 +345,32 @@ footer p { margin: 0 0 10px; }
     padding: 0;
   }
 
-  main { padding-top: 8px; }
+  main {
+    padding-top: 8px;
+  }
 
   .intro {
     min-height: 220px;
     padding-bottom: 45px;
   }
 
-  .marks { margin-bottom: 14px; }
+  .marks {
+    margin-bottom: 14px;
+  }
 
   .mark {
     width: 42px;
     height: 42px;
   }
 
-  .mark-a::before { inset: 7px; border-width: 6px; }
-  .mark-a::after { inset: 14px; }
+  .mark-a::before {
+    inset: 7px;
+    border-width: 6px;
+  }
+
+  .mark-a::after {
+    inset: 14px;
+  }
 
   .intro h1 {
     font-size: 34px;
@@ -264,16 +382,12 @@ footer p { margin: 0 0 10px; }
   }
 
   .project-images {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 8px;
   }
 
-  .project-images img {
-    aspect-ratio: 1 / 1;
-  }
-
   .project-info {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 18px;
   }
 
@@ -283,7 +397,7 @@ footer p { margin: 0 0 10px; }
 
   footer {
     margin: 0 var(--page-pad);
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 24px;
   }
 }
