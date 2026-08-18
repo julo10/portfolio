@@ -130,6 +130,12 @@ main {
   margin: 0 0 16px;
 }
 
+.logo-mark {
+  height: 78px;      /* match old circle height, adjust to taste */
+  width: auto;
+  display: block;
+}
+
 .mark {
   width: 78px;
   height: 78px;
@@ -147,6 +153,7 @@ main {
   border-radius: 50%;
 }
 
+/*
 .mark-a::after {
   inset: 25px;
   border: 0;
@@ -156,6 +163,9 @@ main {
 .mark-b {
   background: repeating-conic-gradient(from 0deg, #000 0 14deg, transparent 14deg 28deg);
 }
+*/
+
+
 
 .intro h1 {
   max-width: 900px;
@@ -216,6 +226,13 @@ main {
 
 .project-elolivo .project-images img:first-child {
   background: #430092;
+}
+
+.project-images.project-video .scroll-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .project-info {
