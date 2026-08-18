@@ -390,11 +390,37 @@ footer a:hover {
     display: none;
   }
 
+  nav.open {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; 
+    gap: 20px;
+    position: fixed;
+    top: 34px; /* matches your mobile .site-header height */
+    left: 0;
+    right: 0;
+    background: var(--bg);
+    padding: 24px var(--page-pad);
+    border-bottom: 1px solid var(--line);
+    z-index: 99;
+    font-size: 20px; /* adjust as needed */
+  }
+
   .menu-button {
+    font-size: 24px;   
+    line-height: 1;
     display: block;
     border: 0;
     background: transparent;
-    font: inherit;
+    /*font: inherit;*/
+    padding: 0;
+  }
+
+  .menu-button.is-close {
+    font-family: var(--sans);
+    font-size: 40px;  
+    position: relative;
+    top: -3px;  
     padding: 0;
   }
 
