@@ -210,11 +210,11 @@ main {
   background: #e5e9dd;
 }
 
-.project-redo .project-images img:first-child {
+.project-teresa .project-images img:first-child {
   background: radial-gradient(circle, #f2ff5b, #caff25 38%, #dfe9cb 75%);
 }
 
-.project-titan .project-images img:first-child {
+.project-elolivo .project-images img:first-child {
   background: #430092;
 }
 
@@ -227,7 +227,9 @@ main {
 }
 
 .project-info > div:first-child {
+  padding-top: 10px;
   font-family: var(--sans);
+  align-self: start;
   display: grid;
   grid-template-columns: max-content minmax(0, 1fr);
   column-gap: 12px;
@@ -263,6 +265,7 @@ main {
 .project-info strong { font-weight: 700; }
 
 .project-description {
+  padding-top: 10px;
   font-family: var(--serif);
   font-weight: 400;
   font-size: 48px;
@@ -288,9 +291,19 @@ footer {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr;
   gap: 30px;
+  overflow-wrap: break-word;
 }
 
-footer p { margin: 0 0 10px; }
+footer p {
+  font-size: 24px;
+  margin: 0 0 10px;
+}
+
+footer p:first-child {
+  font-size: 22px;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
 
 footer a:hover {
   text-decoration: underline;
@@ -298,7 +311,7 @@ footer a:hover {
 
 .footer-mark {
   font-family: var(--sans);
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 700;
 }
 
@@ -330,24 +343,30 @@ footer a:hover {
   }
 
   .project-info {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); /* back to two columns */
-    gap: 12px;
+    grid-template-columns: 1fr;   /* single column: info block, then description below */
+    padding-top: 12px;
   }
 
   .project-info > div:first-child {
-    grid-template-columns: 1fr;   /* single column instead of label + content */
-    row-gap: 4px;
+    grid-template-columns: max-content minmax(0, 1fr);   /* Project | Teresa+subtitle */
+    column-gap: 12px;
+    row-gap: 0;
   }
 
-  .project-info > div:first-child span:first-child,
-  .project-info > div:first-child strong,
+  .project-info > div:first-child span:first-child {
+    grid-column: 1;
+    grid-row: 1 / span 2;   /* "Project" spans both rows, left column */
+  }
+
+  .project-info > div:first-child strong {
+    grid-column: 2;
+    grid-row: 1;            /* "Teresa" — right column, top row */
+  }
+
   .project-info > div:first-child span:last-child {
-    grid-column: 1;   /* stack all three in one column */
+    grid-column: 2;
+    grid-row: 2;            /* subtitle — right column, under Teresa */
   }
-
-  .project-info > div:first-child span:first-child { grid-row: 1; }
-  .project-info > div:first-child strong            { grid-row: 2; }
-  .project-info > div:first-child span:last-child   { grid-row: 3; }
 
   .project-description {
     font-size: 28px;
@@ -360,6 +379,7 @@ footer a:hover {
 
   .project {
     margin-bottom: 18px;   /* smaller gap on mobile */
+    overflow: hidden;
   }
 
   .site-header {
@@ -414,23 +434,42 @@ footer a:hover {
     margin-bottom: 12px;
   }
 
-  .project-images {
-    grid-template-columns: minmax(0, 1fr);
+ .project-images {
+    display: flex;
+    overflow-x: auto;
     gap: 8px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px; /* small buffer so scrollbar doesn't clip images */
+  }
+
+  .project-images img,
+  .project-letter {
+    flex: 0 0 auto;
+    width: 70%;           /* ← controls how "small" each image looks; lower = smaller/more peek */
+    max-height: 240px;
+    scroll-snap-align: start;
   }
 
   .project-info {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 18px;
-  }
-
-  .project-description {
-    max-width: none;
+    /*margin-top: 12px;    /* ← add this: restores spacing now that images are shorter/contained */
   }
 
   footer {
     margin: 0 var(--page-pad);
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 24px;
+  }
+
+  footer p {
+    font-size: 18px;
+  }
+
+  footer p:first-child {
+    font-size: 16px;
+  }
+
+  .footer-mark {
+    font-size: 30px;
   }
 }
