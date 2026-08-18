@@ -329,6 +329,39 @@ footer a:hover {
     --page-pad: 14px;
   }
 
+  .project-info {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); /* back to two columns */
+    gap: 12px;
+  }
+
+  .project-info > div:first-child {
+    grid-template-columns: 1fr;   /* single column instead of label + content */
+    row-gap: 4px;
+  }
+
+  .project-info > div:first-child span:first-child,
+  .project-info > div:first-child strong,
+  .project-info > div:first-child span:last-child {
+    grid-column: 1;   /* stack all three in one column */
+  }
+
+  .project-info > div:first-child span:first-child { grid-row: 1; }
+  .project-info > div:first-child strong            { grid-row: 2; }
+  .project-info > div:first-child span:last-child   { grid-row: 3; }
+
+  .project-description {
+    font-size: 28px;
+    max-width: none;
+  }
+
+  .project-description a {
+    font-size: 20px;   /* mobile-specific size */
+}
+
+  .project {
+    margin-bottom: 18px;   /* smaller gap on mobile */
+  }
+
   .site-header {
     height: 34px;
   }
@@ -373,7 +406,7 @@ footer a:hover {
   }
 
   .intro h1 {
-    font-size: 34px;
+    font-size: clamp(38px, 10vw, 42px);
     line-height: .96;
   }
 
