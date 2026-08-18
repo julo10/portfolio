@@ -153,7 +153,6 @@ main {
   border-radius: 50%;
 }
 
-/*
 .mark-a::after {
   inset: 25px;
   border: 0;
@@ -163,7 +162,6 @@ main {
 .mark-b {
   background: repeating-conic-gradient(from 0deg, #000 0 14deg, transparent 14deg 28deg);
 }
-*/
 
 
 
