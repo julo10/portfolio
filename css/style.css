@@ -300,6 +300,27 @@ main {
   color: #666;
 }
 
+.hidden-project {
+  display: none;
+}
+
+.more-projects {
+ /* border-bottom: 1px solid var(--line);*/
+ /* padding: 20px 0 60px;*/
+  margin-bottom: 72px;
+}
+
+#more-projects-button {
+  font-family: var(--sans);
+  font-size: 24px;
+  color: var(--ink);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+
 footer {
   font-family: var(--sans);
   border-top: 1px solid var(--line);
