@@ -196,9 +196,9 @@ main {
 
 .project-images {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr) minmax(0, .55fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
-  align-items: stretch;
+  align-items: self-start;
   width: 100%;
   max-width: 100%;
 }
@@ -206,8 +206,9 @@ main {
 .project-images img,
 .project-letter {
   width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
+  height: auto;
+  /*aspect-ratio: 1 / 1;
+  object-fit: cover;*/
   display: block;
 }
 
@@ -230,8 +231,9 @@ main {
 
 .project-images.project-video .scroll-video {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
+  /*height: 100%;
+  object-fit: contain;*/
   display: block;
 }
 
@@ -508,12 +510,15 @@ footer a:hover {
     display: flex;
     overflow-x: auto;
     gap: 8px;
-    scroll-snap-type: x mandatory;
+    scroll-snap-type: x proximity;
+    scroll-padding-left: 0;
+    overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
     padding-bottom: 4px; /* small buffer so scrollbar doesn't clip images */
   }
 
-  .project-images img,
+  .project-images img
+  .project-images video,
   .project-letter {
     flex: 0 0 auto;
     width: 70%;           /* ← controls how "small" each image looks; lower = smaller/more peek */
