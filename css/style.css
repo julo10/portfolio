@@ -56,7 +56,7 @@
   --line: #777;
   --serif: "Junicode", serif;
   --sans: "Instrument Sans", sans-serif;
-  --page-pad: clamp(20px, 5vw, 72px);
+  --page-pad: clamp(14px, 2vw, 32px);
 }
 
 * { box-sizing: border-box; }
@@ -153,6 +153,7 @@ main {
   border-radius: 50%;
 }
 
+/*
 .mark-a::after {
   inset: 25px;
   border: 0;
@@ -162,6 +163,7 @@ main {
 .mark-b {
   background: repeating-conic-gradient(from 0deg, #000 0 14deg, transparent 14deg 28deg);
 }
+*/
 
 
 
@@ -283,7 +285,7 @@ main {
   padding-top: 10px;
   font-family: var(--serif);
   font-weight: 400;
-  font-size: 48px;
+  font-size: 42px;
   line-height: 1.1;
   /*max-width: 520px;*/
 }
@@ -294,7 +296,7 @@ main {
 
 .project-description a { color: #666; 
   font-family: var(--sans);
-  font-size: 32px;   
+  font-size: 28px;   
   color: #666;
 }
 
@@ -457,6 +459,12 @@ footer a:hover {
     height: 42px;
   }
 
+  .logo-mark {
+  height: 42px;      /* match old circle height, adjust to taste */
+  width: auto;
+  display: block;
+}
+
   .mark-a::before {
     inset: 7px;
     border-width: 6px;
@@ -498,8 +506,8 @@ footer a:hover {
 
   footer {
     margin: 0 var(--page-pad);
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 24px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: 8px;
   }
 
   footer p {
