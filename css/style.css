@@ -194,7 +194,8 @@ main {
 
 .project-images {
   display: flex;
-  gap: 10px;
+  gap: 0px;
+  margin-right: -5%;
 
   width: 100%;
   max-width: 100%;
@@ -204,9 +205,11 @@ main {
 
   scroll-snap-type: none;
   scroll-behavior: auto;
+
   -webkit-overflow-scrolling: touch;
 
   scrollbar-width: none;
+
   cursor: grab;
 
   user-select: none;
