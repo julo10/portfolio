@@ -179,6 +179,15 @@ carousels.forEach((carousel) => {
       return;
     }
 
+  clearTimeout(autoScrollTimer);
+
+  if (autoScrollAnimation) {
+    cancelAnimationFrame(autoScrollAnimation);
+    autoScrollAnimation = null;
+  }
+
+  isAutoScrolling = false;
+
     isDragging = true;
     hasDragged = false;
 
@@ -336,5 +345,148 @@ carousels.forEach((carousel) => {
   ========================= */
 
   requestBlurUpdate();
+
+
+/* =========================
+   AUTOMATIC SCROLL
+========================= */
+
+let autoScrollTimer;
+let autoScrollAnimation;
+let isAutoScrolling = false;
+
+const AUTO_DELAY = 4000;      // wait 4 seconds
+const AUTO_DISTANCE = 1;      // pixels per frame
+const AUTO_DURATION = 1800;   // 1.8 second movement
+
+
+function startAutoScroll() {
+
+  clearTimeout(autoScrollTimer);
+
+  autoScrollTimer = setTimeout(() => {
+
+    if (isDragging) {
+      startAutoScroll();
+      return;
+    }
+
+    const maxScroll =
+      carousel.scrollWidth -
+      carousel.clientWidth;
+
+    /*
+     * If we're already at the end,
+     * return to the beginning.
+     */
+
+    if (carousel.scrollLeft >= maxScroll - 2) {
+
+      carousel.scrollTo({
+        left: 0,
+        behavior: "smooth"
+      });
+
+      requestBlurUpdate();
+
+      startAutoScroll();
+
+      return;
+    }
+
+
+    /* =========================
+       MOVE FORWARD
+    ========================= */
+
+    const startPosition =
+      carousel.scrollLeft;
+
+    const targetPosition =
+      Math.min(
+        startPosition + carousel.clientWidth * 0.33,
+        maxScroll
+      );
+
+    const distance =
+      targetPosition - startPosition;
+
+    const startTime =
+      performance.now();
+
+    isAutoScrolling = true;
+
+
+    function animateAutoScroll(currentTime) {
+
+      /*
+       * User started dragging.
+       * Stop automatic movement.
+       */
+
+      if (isDragging) {
+        isAutoScrolling = false;
+        return;
+      }
+
+
+      const elapsed =
+        currentTime - startTime;
+
+      const progress =
+        Math.min(
+          elapsed / AUTO_DURATION,
+          1
+        );
+
+
+      /*
+       * Smooth ease-in-out
+       */
+
+      const eased =
+        progress < 0.5
+          ? 2 * progress * progress
+          : 1 -
+            Math.pow(
+              -2 * progress + 2,
+              2
+            ) / 2;
+
+
+      carousel.scrollLeft =
+        startPosition +
+        distance * eased;
+
+
+      requestBlurUpdate();
+
+
+      if (progress < 1) {
+
+        autoScrollAnimation =
+          requestAnimationFrame(
+            animateAutoScroll
+          );
+
+      } else {
+
+        isAutoScrolling = false;
+
+        startAutoScroll();
+      }
+    }
+
+
+    autoScrollAnimation =
+      requestAnimationFrame(
+        animateAutoScroll
+      );
+
+  }, AUTO_DELAY);
+}
+
+
+startAutoScroll();
 
 });
