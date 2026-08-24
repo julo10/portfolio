@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>El Olivo — julO</title>
+  <title>Bohemian Baristas — julO</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
@@ -17,16 +17,33 @@
     <button class="menu-button" aria-label="Open menu">+</button>
   </header>
 
+  <!-- CUSTOM CURSOR -->
+  <div id="cursor">
+    <img src="../images/kiss.svg" alt="">
+  </div>
+
   <main>
     <section class="intro">
-      <h1>El Olivo — Digital Rebrand &amp; User Experience.</h1>
+      <h1>Bohemian Baristas — Digital Rebrand &amp; User Experience.</h1>
     </section>
 
     <section class="work">
-      <div class="project-images">
-        <img src="../images/ElOlivo_003.webp" alt="El Olivo project">
-        <img src="../images/ElOlivo_005.webp" alt="El Olivo project">
-        <img src="../images/ElOlivo_002.webp" alt="El Olivo project">
+      <div class="project-images project-video">
+      
+         <video
+           class="scroll-video"
+           autoplay
+           muted
+           loop
+           playsinline
+           preload="metadata"
+         >
+          <source
+            src="../images/CoffeeCup_GRID.mp4"
+            type="video/mp4"
+          >
+        </video>
+
       </div>
       <div class="project-info">
         <div class="project-info-title">
@@ -62,5 +79,6 @@
   </footer>
 
   <script src="../js/main.js"></script>
+  <script src="../js/mouse.js"></script>
 </body>
 </html>
