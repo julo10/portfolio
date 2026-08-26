@@ -1,760 +1,492 @@
-/* Junicode */
-@font-face {
-  font-family: "Junicode";
-  src: url("../fonts/Junicode.ttf") format("truetype");
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Junicode";
-  src: url("../fonts/Junicode-Bold.ttf") format("truetype");
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Junicode";
-  src: url("../fonts/Junicode-Italic.ttf") format("truetype");
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Junicode";
-  src: url("../fonts/Junicode-BoldItalic.ttf") format("truetype");
-  font-style: italic;
-  font-weight: 700;
-  font-display: swap;
-}
-
-/* Instrument Sans */
-@font-face {
-  font-family: "Instrument Sans";
-  src: url("../fonts/InstrumentSans-VariableFont.ttf") format("truetype-variations");
-  font-style: normal;
-  font-weight: 100 900;   /* variable range, not a single value */
-  font-stretch: 25% 151%; /* adjust to match the font's actual wdth axis range */
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Instrument Sans";
-  src: url("../fonts/InstrumentSans-Italic-VariableFont.ttf") format("truetype-variations");
-  font-style: italic;
-  font-weight: 100 900;
-  font-stretch: 25% 151%;
-  font-display: swap;
-}
-
-:root {
-  --bg: #d2d2d2;
-  --ink: #111;
-  --line: #777;
-  --serif: "Junicode", serif;
-  --sans: "Instrument Sans", sans-serif;
-  --page-pad: clamp(14px, 2vw, 32px);
-}
-
-* { box-sizing: border-box; }
-
-html { scroll-behavior: smooth; }
-
-body {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--serif);
-  font-size: 24px;
-  line-height: 1.25;
-  letter-spacing: -3%;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.site-header {
-  height: 48px;
-  margin: 0 var(--page-pad);
-  border-bottom: 1px solid var(--line);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  background: var(--bg);
-  z-index: 100;
-}
-
-.wordmark {
-  font-family: var(--sans);
-  font-weight: 700;
-  font-size: 30px;
-}
-
-nav {
-  display: flex;
-  gap: 34px;
-  font-family: Instrument Sans, sans-serif;
-}
-
-nav a:hover,
-.project-description a:hover {
-  text-decoration: underline;
-}
-
-.menu-button { display: none; }
-
-main {
-  padding: 10px var(--page-pad) 100px;
-}
-
-.intro {
-  min-height: 285px;
-  border-bottom: 1px solid var(--line);
-  padding: 0 0 70px;
-}
-
-.marks {
-  display: flex;
-  gap: 10px;
-  margin: 0 0 16px;
-}
-
-.logo-mark {
-  height: 78px;      /* match old circle height, adjust to taste */
-  width: auto;
-  display: block;
-}
-
-.mark {
-  width: 78px;
-  height: 78px;
-  background: #000;
-  border-radius: 50%;
-  position: relative;
-}
-
-.mark-a::before,
-.mark-a::after {
-  content: "";
-  position: absolute;
-  inset: 12px;
-  border: 10px solid var(--bg);
-  border-radius: 50%;
-}
-
-/*
-.mark-a::after {
-  inset: 25px;
-  border: 0;
-  background: var(--bg);
-}
-
-.mark-b {
-  background: repeating-conic-gradient(from 0deg, #000 0 14deg, transparent 14deg 28deg);
-}
-*/
-
-/* =========================================
-   CUSTOM CURSOR
-   ========================================= */
-
-#cursor {
-  position: fixed;
-
-  left: 50vw;
-  top: 50vh;
-
-  width: 40px;
-  height: 40px;
-
-  pointer-events: none;
-
-  z-index: 999999;
-
-  transform: translate(-50%, -50%);
-
-  will-change: left, top;
-}
-
-
-#cursor img {
-  width: 100%;
-  height: 100%;
-
-  display: block;
-
-  pointer-events: none;
-
-  will-change: transform;
-}
-
-
-/* =========================================
-   CLICK ANIMATION
-   ========================================= */
-
-#cursor.clicked img {
-  animation: cursorClick 300ms ease-out;
-}
-
-
-@keyframes cursorClick {
-
-  0% {
-    transform: scale(1);
-  }
-
-  45% {
-    transform: scale(1.3);
-  }
-
-  100% {
-    transform: scale(1);
-  }
-
-}
-
-
-/* =========================================
-   CURSOR TRAIL
-   ========================================= */
+document.querySelector('.menu-button')?.addEventListener('click', () => {
+  const nav = document.querySelector('.site-header nav');
+  const btn = document.querySelector('.menu-button');
+  if (!nav) return;
 
-.cursor-trail {
-  position: fixed;
+  nav.classList.toggle('open');
+  const isOpen = nav.classList.contains('open');
+  btn.textContent = isOpen ? '-' : '+';
+  btn.classList.toggle('is-close', isOpen);
+});
 
-  left: 50vw;
-  top: 50vh;
+document.querySelectorAll('.site-header nav a').forEach(link => {
+  link.addEventListener('click', () => {
+    const nav = document.querySelector('.site-header nav');
+    const btn = document.querySelector('.menu-button');
+    nav.classList.remove('open');
+    btn.textContent = '+';
+    btn.classList.remove('is-close');
+  });
+});
 
-  width: 40px;
-  height: 40px;
+// Play/pause project videos on scroll visibility
+const scrollVideos = document.querySelectorAll('.scroll-video');
 
-  pointer-events: none;
+if (scrollVideos.length) {
+  const videoObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const video = entry.target;
+        if (entry.isIntersecting) {
+          video.play().catch(() => {
+            // autoplay can be blocked in some browsers; fail silently
+          });
+        } else {
+          video.pause();
+        }
+      });
+    },
+    {
+      threshold: 0.4, // video is ~40% visible before it starts playing
+    }
+  );
 
-  z-index: 999998;
-
-  transform: translate(-50%, -50%);
-
-  will-change: left, top, width, height, opacity;
-
-  opacity: 0.3;
-}
-
-
-.cursor-trail img {
-  width: 100%;
-  height: 100%;
-
-  display: block;
-
-  pointer-events: none;
-}
-
-
-/* =========================================
-   HIDE SYSTEM CURSOR
-   ========================================= */
-
-@media (pointer: fine) {
-
-  html,
-  body,
-  a,
-  button,
-  .project-images,
-  .project-images * {
-    cursor: none !important;
-  }
-
-}
-
-/**______________________________________________________**/
-
-.intro h1 {
-  max-width: 900px;
-  margin: 0;
-  font-family: var(--serif);
-  font-size: clamp(42px, 5vw, 72px);
-  font-weight: 400;
-  line-height: .94;
-  letter-spacing: -0.035em;
-}
-
-.work {
-  padding-top: 20px;
-}
-
-.section-label {
-  font-family: var(--sans);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 10px;
-  /*-padding-top: 12px;*/
-  margin-bottom: 68px;
-}
-
-.project {
-  margin-bottom: 72px;
-}
-
-.project-images {
-  display: flex;
-  gap: 0px;
-  margin-right: -5%;
-
-  width: 100%;
-  max-width: 100%;
-
-  overflow-x: auto;
-  overflow-y: hidden;
-
-  scroll-snap-type: none;
-  scroll-behavior: auto;
-
-  -webkit-overflow-scrolling: touch;
-
-  scrollbar-width: none;
-
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-.project-images::-webkit-scrollbar {
-  display: none;
-}
-
-.project-images img,
-.project-images video {
-  flex: 0 0 32%;
-  width: 32%;
-  height: auto;
-
-  display: block;
-  
-  object-fit: cover;
-  
-  scroll-snap-align: none;
-
-  transition: filter 120ms linear;
-
-  pointer-events: none;
-
-}
-
-.project-letter {
-  display: grid;
-  place-items: center;
-  font-family: var(--serif);
-  font-size: clamp(120px, 15vw, 250px);
-  color: #55706b;
-  background: #e5e9dd;
-}
-
-.project-teresa .project-images img:first-child {
-  background: radial-gradient(circle, #f2ff5b, #caff25 38%, #dfe9cb 75%);
-}
-
-.project-elolivo .project-images img:first-child {
-  background: #430092;
+  scrollVideos.forEach((video) => videoObserver.observe(video));
 }
 
-.project-info {
-  font-family: var(--sans);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 10px;
-  padding-top: 12px;
-}
+// Make the button "More Projects" reveal hidden projects
+const moreButton = document.getElementById("more-projects-button");
 
-.project-info > div:first-child {
-  padding-top: 10px;
-  font-family: var(--sans);
-  align-self: start;
-  display: grid;
-  grid-template-columns: max-content minmax(0, 1fr);
-  column-gap: 12px;
-  align-items: start;
-}
+if (moreButton) {
+  moreButton.addEventListener("click", () => {
+    const hiddenProjects = document.querySelectorAll(".hidden-project");
 
-.project-info > div:first-child span:first-child {
-  font-family: var(--sans);
-  grid-column: 1;
-  grid-row: 1 / span 2;
-  white-space: nowrap;
-}
+    const isExpanded = moreButton.dataset.expanded === "true";
 
-.project-info > div:first-child strong {
-  font-family: var(--serif);
-  font-size: 42px;
-  grid-column: 2;
-  grid-row: 1;
-  min-width: 0;
-  display: block;
-  line-height: 1.1;
-}
+    hiddenProjects.forEach(project => {
+      project.style.display = isExpanded ? "none" : "block";
+    });
 
-.project-info > div:first-child span:last-child {
-  font-family: var(--sans);
-  grid-column: 2;
-  grid-row: 2;
-  min-width: 0;
-  display: block;
-  line-height: 1.1;
-}
+    moreButton.dataset.expanded = isExpanded ? "false" : "true";
 
-.project-info strong { font-weight: 700; }
-
-.project-description {
-  padding-top: 10px;
-  font-family: var(--serif);
-  font-weight: 400;
-  font-size: 42px;
-  line-height: 1.1;
-  /*max-width: 520px;*/
+    moreButton.textContent = isExpanded
+      ? "More Projects +"
+      : "Less Projects −";
+  });
 }
 
-.project-description p {
-  margin: 0 0 24px;
-}
+  /* ==================================================================================================================== */
 
-.project-description a { color: #666; 
-  font-family: var(--sans);
-  font-size: 28px;   
-  color: #666;
-}
+const carousels = document.querySelectorAll(".project-images");
 
-.hidden-project {
-  display: none;
-}
+carousels.forEach((carousel) => {
+  /* =========================
+     STATE
+  ========================= */
 
-.more-projects {
- /* border-bottom: 1px solid var(--line);*/
- /* padding: 20px 0 60px;*/
-  margin-bottom: 72px;
-}
+  let isDragging = false;
+  let hasDragged = false;
 
-#more-projects-button {
-  font-family: var(--sans);
-  font-size: 24px;
-  color: var(--ink);
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-}
+  let startX = 0;
+  let startScrollLeft = 0;
 
-/* =========================================
-   OTHER PROJECTS
-========================================= */
+  const DRAG_THRESHOLD = 6;
 
-.other-projects {
-  margin-top: 140px;
-  padding-bottom: 100px;
-}
+  let animationFrame = null;
 
-.other-projects .section-label {
-  margin-bottom: 68px;
-}
 
-.other-projects-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 10px;
-  border-top: 1px solid var(--line);
-}
+  /* =========================
+     UPDATE IMAGE BLUR
+  ========================= */
 
-.other-projects-grid a {
-  display: grid;
-  grid-template-columns: max-content minmax(0, 1fr);
-  column-gap: 12px;
+  function updateImageBlur() {
+    const carouselRect = carousel.getBoundingClientRect();
 
-  padding: 12px 0;
+    const viewportLeft = carouselRect.left;
+    const viewportRight = carouselRect.right;
 
-  border-bottom: 1px solid var(--line);
+    const images = carousel.querySelectorAll("img, video");
 
-  font-family: var(--sans);
-}
+    images.forEach((image) => {
+      const rect = image.getBoundingClientRect();
 
-.other-projects-grid a span {
-  grid-column: 1;
-  grid-row: 1;
-}
+      const imageLeft = rect.left;
+      const imageRight = rect.right;
+      const imageWidth = rect.width;
 
-.other-projects-grid a strong {
-  grid-column: 2;
-  grid-row: 1;
-
-  font-family: var(--serif);
-  font-size: 42px;
-  font-weight: 700;
-  line-height: 1.1;
-}
+      if (imageWidth <= 0) return;
 
-.other-projects-grid a:hover strong {
-  text-decoration: underline;
-}
+      const visibleLeft = Math.max(
+        imageLeft,
+        viewportLeft
+      );
 
+      const visibleRight = Math.min(
+        imageRight,
+        viewportRight
+      );
 
-footer {
-  font-family: var(--sans);
-  border-top: 1px solid var(--line);
-  margin: 0 var(--page-pad);
-  padding: 18px 0 60px;
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 30px;
-  overflow-wrap: break-word;
-}
+      const visibleWidth = Math.max(
+        0,
+        visibleRight - visibleLeft
+      );
 
-footer p {
-  font-size: 24px;
-  margin: 0 0 10px;
-}
+      const visibility = visibleWidth / imageWidth;
 
-footer p:first-child {
-  font-size: 22px;
-  text-transform: uppercase;
-  opacity: 0.7;
-}
 
-footer a:hover {
-  text-decoration: underline;
-}
+      /* Fully visible = completely sharp */
 
-.footer-mark {
-  font-family: var(--sans);
-  font-size: 30px;
-  font-weight: 700;
-}
+      if (visibility >= 0.999) {
+        image.style.filter = "blur(0px)";
+        return;
+      }
 
-@media (max-width: 900px) {
-  :root {
-    --page-pad: 28px;
-  }
-
-  .intro h1 {
-    font-size: clamp(40px, 6vw, 58px);
-  }
-
-  .project-images {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  }
-
-  .project-letter {
-    display: none;
-  }
-
-  .project-info {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  }
-}
 
-@media (max-width: 600px) {
-  :root {
-    --page-pad: 14px;
-  }
-
-  .project-info {
-    grid-template-columns: 1fr;   /* single column: info block, then description below */
-    padding-top: 12px;
-  }
-
-  .project-info > div:first-child {
-    grid-template-columns: max-content minmax(0, 1fr);   /* Project | Teresa+subtitle */
-    column-gap: 12px;
-    row-gap: 0;
-  }
-
-  .project-info > div:first-child span:first-child {
-    grid-column: 1;
-    grid-row: 1 / span 2;   /* "Project" spans both rows, left column */
-  }
-
-  .project-info > div:first-child strong {
-    grid-column: 2;
-    grid-row: 1;            /* "Teresa" — right column, top row */
-  }
-
-  .project-info > div:first-child span:last-child {
-    grid-column: 2;
-    grid-row: 2;            /* subtitle — right column, under Teresa */
-  }
-
-  .project-description {
-    font-size: 28px;
-    max-width: none;
-  }
-
-  .project-description a {
-    font-size: 20px;   /* mobile-specific size */
-}
+      /* Completely outside = maximum blur */
 
-  .project {
-    margin-bottom: 18px;   /* smaller gap on mobile */
-    overflow: hidden;
-  }
-
-  .site-header {
-    height: 34px;
-  }
-
-@media (pointer: fine) {
-  
-  html,
-  body,
-  a,
-  button, 
-  .project-images {
-    cursor: none;
-  }
+      if (visibility <= 0) {
+        image.style.filter = "blur(14px)";
+        return;
+      }
 
-}
 
-  nav {
-    display: none;
-  }
-
-  nav.open {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end; 
-    gap: 20px;
-    position: fixed;
-    top: 34px; /* matches your mobile .site-header height */
-    left: 0;
-    right: 0;
-    background: var(--bg);
-    padding: 24px var(--page-pad);
-    border-bottom: 1px solid var(--line);
-    z-index: 99;
-    font-size: 20px; /* adjust as needed */
-  }
-
-  .menu-button {
-    font-size: 24px;   
-    line-height: 1;
-    display: block;
-    border: 0;
-    background: transparent;
-    /*font: inherit;*/
-    padding: 0;
-  }
-
-  .menu-button.is-close {
-    font-family: var(--sans);
-    font-size: 40px;  
-    position: relative;
-    top: -3px;  
-    padding: 0;
-  }
-
-  main {
-    padding-top: 8px;
-  }
-
-  .intro {
-    min-height: 220px;
-    padding-bottom: 45px;
-  }
-
-  .marks {
-    margin-bottom: 14px;
-  }
-
-  .mark {
-    width: 42px;
-    height: 42px;
-  }
-
-  .logo-mark {
-  height: 42px;      /* match old circle height, adjust to taste */
-  width: auto;
-  display: block;
-}
+      /* Partially visible = progressive blur */
 
-  .mark-a::before {
-    inset: 7px;
-    border-width: 6px;
-  }
-
-  .mark-a::after {
-    inset: 14px;
-  }
-
-  .intro h1 {
-    font-size: clamp(38px, 10vw, 42px);
-    line-height: .96;
-  }
-
-  .section-label {
-    margin-bottom: 12px;
-  }
-
- .project-images {
-    gap: 8px;
-    /*display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
-    scroll-padding-left: 0;
-    overscroll-behavior-x: contain;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 4px; /* small buffer so scrollbar doesn't clip images */
-  }
-
-  .project-images img,
-  .project-images video,
-  .project-letter {
-    flex: 0 0 70%;
-    width: 70%;
-    max-height: 240px;
-    scroll-snap-align: start;
-  }
+      const blurProgress =
+        Math.pow(1 - visibility, 1.4);
 
-}
+      const blur =
+        blurProgress * 14;
 
-  .project-info {
-    /*margin-top: 12px;    /* ← add this: restores spacing now that images are shorter/contained */
+      image.style.filter =
+        `blur(${blur}px)`;
+    });
   }
 
 
-@media (pointer: coarse) {
+  /* =========================
+     SMOOTH BLUR UPDATES
+  ========================= */
 
-  #cursor {
-    opacity: 0;
-    transition: opacity 150ms ease;
+  function requestBlurUpdate() {
+    if (animationFrame) return;
+
+    animationFrame = requestAnimationFrame(() => {
+      updateImageBlur();
+      animationFrame = null;
+    });
   }
 
-  .cursor-trail {
-    opacity: 0;
-    transition: opacity 150ms ease;
+
+  /* =========================
+     POINTER DOWN
+  ========================= */
+
+  carousel.addEventListener("pointerdown", (e) => {
+
+    // Only use the primary mouse button
+    if (e.pointerType === "mouse" && e.button !== 0) {
+      return;
+    }
+
+  clearTimeout(autoScrollTimer);
+
+  if (autoScrollAnimation) {
+    cancelAnimationFrame(autoScrollAnimation);
+    autoScrollAnimation = null;
   }
 
+  isAutoScrolling = false;
+
+    isDragging = true;
+    hasDragged = false;
+
+    startX = e.clientX;
+    startScrollLeft = carousel.scrollLeft;
+
+    carousel.classList.add("is-dragging");
+
+    // Keep receiving pointer events even outside carousel
+    carousel.setPointerCapture(e.pointerId);
+
+    e.preventDefault();
+  });
+
+
+  /* =========================
+     POINTER MOVE
+  ========================= */
+
+  carousel.addEventListener("pointermove", (e) => {
+
+    if (!isDragging) return;
+
+    const distance = e.clientX - startX;
+
+
+    /*
+     * Only turn the interaction into a drag
+     * after the pointer has moved enough.
+     */
+
+    if (Math.abs(distance) > DRAG_THRESHOLD) {
+      hasDragged = true;
+    }
+
+
+    /*
+     * If this is still just a click,
+     * don't move the carousel.
+     */
+
+    if (!hasDragged) {
+      return;
+    }
+
+
+    /*
+     * Move carousel freely.
+     */
+
+    carousel.scrollLeft =
+      startScrollLeft - distance * 1.2;
+
+    requestBlurUpdate();
+
+    e.preventDefault();
+  });
+
+
+  /* =========================
+     STOP DRAGGING
+  ========================= */
+
+  function stopDragging(e) {
+
+    if (!isDragging) return;
+
+    isDragging = false;
+
+    carousel.classList.remove("is-dragging");
+
+    if (
+      e.pointerId !== undefined &&
+      carousel.hasPointerCapture(e.pointerId)
+    ) {
+      carousel.releasePointerCapture(e.pointerId);
+    }
+
+    requestBlurUpdate();
+  }
+
+
+  carousel.addEventListener(
+    "pointerup",
+    stopDragging
+  );
+
+  carousel.addEventListener(
+    "pointercancel",
+    stopDragging
+  );
+
+
+  /* =========================
+     BLOCK CLICK AFTER DRAG
+  ========================= */
+
+  carousel.addEventListener("click", (e) => {
+
+    /*
+     * If the user actually dragged,
+     * prevent the link from opening.
+     */
+
+    if (hasDragged) {
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      hasDragged = false;
+    }
+  });
+
+
+  /* =========================
+     UPDATE WHILE SCROLLING
+  ========================= */
+
+  carousel.addEventListener(
+    "scroll",
+    requestBlurUpdate,
+    { passive: true }
+  );
+
+
+  /* =========================
+     RESIZE
+  ========================= */
+
+  window.addEventListener(
+    "resize",
+    requestBlurUpdate
+  );
+
+
+  /* =========================
+     IMAGE LOAD
+  ========================= */
+
+  carousel.querySelectorAll("img").forEach((img) => {
+
+    if (img.complete) {
+      requestBlurUpdate();
+    }
+
+    img.addEventListener(
+      "load",
+      requestBlurUpdate
+    );
+  });
+
+
+  /* =========================
+     INITIAL UPDATE
+  ========================= */
+
+  requestBlurUpdate();
+
+
+/* =========================
+   AUTOMATIC SCROLL
+========================= */
+
+let autoScrollTimer;
+let autoScrollAnimation;
+let isAutoScrolling = false;
+
+const AUTO_DELAY = 4000;      // wait 4 seconds
+const AUTO_DISTANCE = 1;      // pixels per frame
+const AUTO_DURATION = 1800;   // 1.8 second movement
+
+
+function startAutoScroll() {
+
+  clearTimeout(autoScrollTimer);
+
+  autoScrollTimer = setTimeout(() => {
+
+    if (isDragging) {
+      startAutoScroll();
+      return;
+    }
+
+    const maxScroll =
+      carousel.scrollWidth -
+      carousel.clientWidth;
+
+    /*
+     * If we're already at the end,
+     * return to the beginning.
+     */
+
+    if (carousel.scrollLeft >= maxScroll - 2) {
+
+      carousel.scrollTo({
+        left: 0,
+        behavior: "smooth"
+      });
+
+      requestBlurUpdate();
+
+      startAutoScroll();
+
+      return;
+    }
+
+
+    /* =========================
+       MOVE FORWARD
+    ========================= */
+
+    const startPosition =
+      carousel.scrollLeft;
+
+    const targetPosition =
+      Math.min(
+        startPosition + carousel.clientWidth * 0.33,
+        maxScroll
+      );
+
+    const distance =
+      targetPosition - startPosition;
+
+    const startTime =
+      performance.now();
+
+    isAutoScrolling = true;
+
+
+    function animateAutoScroll(currentTime) {
+
+      /*
+       * User started dragging.
+       * Stop automatic movement.
+       */
+
+      if (isDragging) {
+        isAutoScrolling = false;
+        return;
+      }
+
+
+      const elapsed =
+        currentTime - startTime;
+
+      const progress =
+        Math.min(
+          elapsed / AUTO_DURATION,
+          1
+        );
+
+
+      /*
+       * Smooth ease-in-out
+       */
+
+      const eased =
+        progress < 0.5
+          ? 2 * progress * progress
+          : 1 -
+            Math.pow(
+              -2 * progress + 2,
+              2
+            ) / 2;
+
+
+      carousel.scrollLeft =
+        startPosition +
+        distance * eased;
+
+
+      requestBlurUpdate();
+
+
+      if (progress < 1) {
+
+        autoScrollAnimation =
+          requestAnimationFrame(
+            animateAutoScroll
+          );
+
+      } else {
+
+        isAutoScrolling = false;
+
+        startAutoScroll();
+      }
+    }
+
+
+    autoScrollAnimation =
+      requestAnimationFrame(
+        animateAutoScroll
+      );
+
+  }, AUTO_DELAY);
 }
 
-  footer {
-    margin: 0 var(--page-pad);
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
-    gap: 8px;
-  }
 
-  footer p {
-    font-size: 18px;
-  }
+startAutoScroll();
 
-  footer p:first-child {
-    font-size: 16px;
-  }
-
-  .footer-mark {
-    font-size: 30px;
-  }
-}
+});
