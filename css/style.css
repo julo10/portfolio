@@ -725,6 +725,21 @@ footer a:hover {
     /*margin-top: 12px;    /* ← add this: restores spacing now that images are shorter/contained */
   }
 
+
+@media (pointer: coarse) {
+
+  #cursor {
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
+
+  .cursor-trail {
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
+
+}
+
   footer {
     margin: 0 var(--page-pad);
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
