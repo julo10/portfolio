@@ -1,259 +1,760 @@
-const cursor = document.getElementById("cursor");
+/* Junicode */
+@font-face {
+  font-family: "Junicode";
+  src: url("../fonts/Junicode.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
 
-if (cursor) {
+@font-face {
+  font-family: "Junicode";
+  src: url("../fonts/Junicode-Bold.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
 
-  const cursorImage = cursor.querySelector("img");
+@font-face {
+  font-family: "Junicode";
+  src: url("../fonts/Junicode-Italic.ttf") format("truetype");
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+}
 
-const basePath = window.location.pathname.includes("/projects/")
-  ? "../images/"
-  : "images/";
+@font-face {
+  font-family: "Junicode";
+  src: url("../fonts/Junicode-BoldItalic.ttf") format("truetype");
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+}
 
-const normalSVG = basePath + "kiss.svg";
-const dragSVG = basePath + "kiss_drag.svg";
+/* Instrument Sans */
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("../fonts/InstrumentSans-VariableFont.ttf") format("truetype-variations");
+  font-style: normal;
+  font-weight: 100 900;   /* variable range, not a single value */
+  font-stretch: 25% 151%; /* adjust to match the font's actual wdth axis range */
+  font-display: swap;
+}
 
-  // =========================================
-  // SETTINGS
-  // =========================================
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("../fonts/InstrumentSans-Italic-VariableFont.ttf") format("truetype-variations");
+  font-style: italic;
+  font-weight: 100 900;
+  font-stretch: 25% 151%;
+  font-display: swap;
+}
 
-  const TRAIL_COUNT = 10;
+:root {
+  --bg: #d2d2d2;
+  --ink: #111;
+  --line: #777;
+  --serif: "Junicode", serif;
+  --sans: "Instrument Sans", sans-serif;
+  --page-pad: clamp(14px, 2vw, 32px);
+}
 
-  // Main cursor
-  const CURSOR_SMOOTHING = 0.25;
+* { box-sizing: border-box; }
 
-  // Trail
-  const TRAIL_SMOOTHING = 0.26;
+html { scroll-behavior: smooth; }
 
-  // Trail starts at this size and gradually becomes smaller
-  const TRAIL_START_SIZE = 34;
-  const TRAIL_END_SIZE = 10;
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 24px;
+  line-height: 1.25;
+  letter-spacing: -3%;
+}
 
-  // Trail starts visible and gradually disappears
-  const TRAIL_START_OPACITY = 0.30;
-  const TRAIL_END_OPACITY = 0;
+a {
+  color: inherit;
+  text-decoration: none;
+}
 
-  // =========================================
-  // CURSOR STATE
-  // =========================================
+.site-header {
+  height: 48px;
+  margin: 0 var(--page-pad);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 100;
+}
 
-  let mouseX = window.innerWidth / 2;
-  let mouseY = window.innerHeight / 2;
+.wordmark {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 30px;
+}
 
-  let cursorX = mouseX;
-  let cursorY = mouseY;
+nav {
+  display: flex;
+  gap: 34px;
+  font-family: Instrument Sans, sans-serif;
+}
 
-  let isDragging = false;
+nav a:hover,
+.project-description a:hover {
+  text-decoration: underline;
+}
 
-  // =========================================
-  // CREATE TRAIL
-  // =========================================
+.menu-button { display: none; }
 
-  const trail = [];
+main {
+  padding: 10px var(--page-pad) 100px;
+}
 
-  for (let i = 0; i < TRAIL_COUNT; i++) {
+.intro {
+  min-height: 285px;
+  border-bottom: 1px solid var(--line);
+  padding: 0 0 70px;
+}
 
-    const element = document.createElement("div");
+.marks {
+  display: flex;
+  gap: 10px;
+  margin: 0 0 16px;
+}
 
-    element.className = "cursor-trail";
+.logo-mark {
+  height: 78px;      /* match old circle height, adjust to taste */
+  width: auto;
+  display: block;
+}
 
-    const image = document.createElement("img");
+.mark {
+  width: 78px;
+  height: 78px;
+  background: #000;
+  border-radius: 50%;
+  position: relative;
+}
 
-    image.src = normalSVG;
-    image.alt = "";
+.mark-a::before,
+.mark-a::after {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border: 10px solid var(--bg);
+  border-radius: 50%;
+}
 
-    element.appendChild(image);
-    document.body.appendChild(element);
+/*
+.mark-a::after {
+  inset: 25px;
+  border: 0;
+  background: var(--bg);
+}
 
-    /*
-     * Progress:
-     * 0 = first trail element
-     * 1 = last trail element
-     */
+.mark-b {
+  background: repeating-conic-gradient(from 0deg, #000 0 14deg, transparent 14deg 28deg);
+}
+*/
 
-    const progress = i / (TRAIL_COUNT - 1);
+/* =========================================
+   CUSTOM CURSOR
+   ========================================= */
 
-    /*
-     * Size gets smaller toward the end.
-     */
+#cursor {
+  position: fixed;
 
-    const size =
-      TRAIL_START_SIZE +
-      (TRAIL_END_SIZE - TRAIL_START_SIZE) * progress;
+  left: 50vw;
+  top: 50vh;
 
-    /*
-     * Opacity gets lower toward the end.
-     */
+  width: 40px;
+  height: 40px;
 
-    const opacity =
-      TRAIL_START_OPACITY +
-      (TRAIL_END_OPACITY - TRAIL_START_OPACITY) * progress;
+  pointer-events: none;
 
-    element.style.width = `${size}px`;
-    element.style.height = `${size}px`;
-    element.style.opacity = opacity;
+  z-index: 999999;
 
-    trail.push({
-      element,
-      x: mouseX,
-      y: mouseY,
+  transform: translate(-50%, -50%);
 
-      /*
-       * Later trail elements move slightly slower.
-       * This creates a smoother, longer tail.
-       */
+  will-change: left, top;
+}
 
-      smoothing:
-        TRAIL_SMOOTHING -
-        progress * 0.07
-    });
+
+#cursor img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  pointer-events: none;
+
+  will-change: transform;
+}
+
+
+/* =========================================
+   CLICK ANIMATION
+   ========================================= */
+
+#cursor.clicked img {
+  animation: cursorClick 300ms ease-out;
+}
+
+
+@keyframes cursorClick {
+
+  0% {
+    transform: scale(1);
   }
 
-  // =========================================
-  // MOUSE POSITION
-  // =========================================
-
-  document.addEventListener("mousemove", (e) => {
-
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-
-  });
-
-  // =========================================
-  // MAIN CURSOR + TRAIL
-  // =========================================
-
-  function animateCursor() {
-
-    /*
-     * Smooth main cursor
-     */
-
-    cursorX +=
-      (mouseX - cursorX) *
-      CURSOR_SMOOTHING;
-
-    cursorY +=
-      (mouseY - cursorY) *
-      CURSOR_SMOOTHING;
-
-    cursor.style.left = `${cursorX}px`;
-    cursor.style.top = `${cursorY}px`;
-
-
-    // =========================================
-    // TRAIL
-    // =========================================
-
-    let previousX = cursorX;
-    let previousY = cursorY;
-
-    trail.forEach((item) => {
-
-      item.x +=
-        (previousX - item.x) *
-        item.smoothing;
-
-      item.y +=
-        (previousY - item.y) *
-        item.smoothing;
-
-      item.element.style.left = `${item.x}px`;
-      item.element.style.top = `${item.y}px`;
-
-      previousX = item.x;
-      previousY = item.y;
-
-    });
-
-    requestAnimationFrame(animateCursor);
+  45% {
+    transform: scale(1.3);
   }
 
-  animateCursor();
+  100% {
+    transform: scale(1);
+  }
+
+}
 
 
-  // =========================================
-  // CLICK ANIMATION
-  // =========================================
+/* =========================================
+   CURSOR TRAIL
+   ========================================= */
 
-  document.addEventListener("mousedown", () => {
+.cursor-trail {
+  position: fixed;
 
-    cursor.classList.remove("clicked");
+  left: 50vw;
+  top: 50vh;
 
-    // Force animation restart
-    void cursor.offsetWidth;
+  width: 40px;
+  height: 40px;
 
-    cursor.classList.add("clicked");
+  pointer-events: none;
 
-  });
+  z-index: 999998;
 
+  transform: translate(-50%, -50%);
 
-  // =========================================
-  // REMOVE CLICK STATE
-  // =========================================
+  will-change: left, top, width, height, opacity;
 
-  cursor.addEventListener("animationend", () => {
-
-    cursor.classList.remove("clicked");
-
-  });
+  opacity: 0.3;
+}
 
 
-  // =========================================
-  // CAROUSEL DRAG
-  // =========================================
+.cursor-trail img {
+  width: 100%;
+  height: 100%;
 
-  const carousels =
-    document.querySelectorAll(".project-images");
+  display: block;
 
-
-  carousels.forEach((carousel) => {
-
-    carousel.addEventListener("pointermove", () => {
-
-      if (
-        carousel.classList.contains("is-dragging") &&
-        !isDragging
-      ) {
-
-        isDragging = true;
-
-        cursorImage.src = dragSVG;
-
-      }
-
-    });
+  pointer-events: none;
+}
 
 
-    carousel.addEventListener("pointerup", () => {
+/* =========================================
+   HIDE SYSTEM CURSOR
+   ========================================= */
 
-      isDragging = false;
+@media (pointer: fine) {
 
-      cursorImage.src = normalSVG;
+  html,
+  body,
+  a,
+  button,
+  .project-images,
+  .project-images * {
+    cursor: none !important;
+  }
 
-    });
+}
+
+/**______________________________________________________**/
+
+.intro h1 {
+  max-width: 900px;
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(42px, 5vw, 72px);
+  font-weight: 400;
+  line-height: .94;
+  letter-spacing: -0.035em;
+}
+
+.work {
+  padding-top: 20px;
+}
+
+.section-label {
+  font-family: var(--sans);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  /*-padding-top: 12px;*/
+  margin-bottom: 68px;
+}
+
+.project {
+  margin-bottom: 72px;
+}
+
+.project-images {
+  display: flex;
+  gap: 0px;
+  margin-right: -5%;
+
+  width: 100%;
+  max-width: 100%;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  scroll-snap-type: none;
+  scroll-behavior: auto;
+
+  -webkit-overflow-scrolling: touch;
+
+  scrollbar-width: none;
+
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.project-images::-webkit-scrollbar {
+  display: none;
+}
+
+.project-images img,
+.project-images video {
+  flex: 0 0 32%;
+  width: 32%;
+  height: auto;
+
+  display: block;
+  
+  object-fit: cover;
+  
+  scroll-snap-align: none;
+
+  transition: filter 120ms linear;
+
+  pointer-events: none;
+
+}
+
+.project-letter {
+  display: grid;
+  place-items: center;
+  font-family: var(--serif);
+  font-size: clamp(120px, 15vw, 250px);
+  color: #55706b;
+  background: #e5e9dd;
+}
+
+.project-teresa .project-images img:first-child {
+  background: radial-gradient(circle, #f2ff5b, #caff25 38%, #dfe9cb 75%);
+}
+
+.project-elolivo .project-images img:first-child {
+  background: #430092;
+}
+
+.project-info {
+  font-family: var(--sans);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  padding-top: 12px;
+}
+
+.project-info > div:first-child {
+  padding-top: 10px;
+  font-family: var(--sans);
+  align-self: start;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: start;
+}
+
+.project-info > div:first-child span:first-child {
+  font-family: var(--sans);
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  white-space: nowrap;
+}
+
+.project-info > div:first-child strong {
+  font-family: var(--serif);
+  font-size: 42px;
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  display: block;
+  line-height: 1.1;
+}
+
+.project-info > div:first-child span:last-child {
+  font-family: var(--sans);
+  grid-column: 2;
+  grid-row: 2;
+  min-width: 0;
+  display: block;
+  line-height: 1.1;
+}
+
+.project-info strong { font-weight: 700; }
+
+.project-description {
+  padding-top: 10px;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 42px;
+  line-height: 1.1;
+  /*max-width: 520px;*/
+}
+
+.project-description p {
+  margin: 0 0 24px;
+}
+
+.project-description a { color: #666; 
+  font-family: var(--sans);
+  font-size: 28px;   
+  color: #666;
+}
+
+.hidden-project {
+  display: none;
+}
+
+.more-projects {
+ /* border-bottom: 1px solid var(--line);*/
+ /* padding: 20px 0 60px;*/
+  margin-bottom: 72px;
+}
+
+#more-projects-button {
+  font-family: var(--sans);
+  font-size: 24px;
+  color: var(--ink);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* =========================================
+   OTHER PROJECTS
+========================================= */
+
+.other-projects {
+  margin-top: 140px;
+  padding-bottom: 100px;
+}
+
+.other-projects .section-label {
+  margin-bottom: 68px;
+}
+
+.other-projects-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 10px;
+  border-top: 1px solid var(--line);
+}
+
+.other-projects-grid a {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: 12px;
+
+  padding: 12px 0;
+
+  border-bottom: 1px solid var(--line);
+
+  font-family: var(--sans);
+}
+
+.other-projects-grid a span {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.other-projects-grid a strong {
+  grid-column: 2;
+  grid-row: 1;
+
+  font-family: var(--serif);
+  font-size: 42px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.other-projects-grid a:hover strong {
+  text-decoration: underline;
+}
 
 
-    carousel.addEventListener("pointercancel", () => {
+footer {
+  font-family: var(--sans);
+  border-top: 1px solid var(--line);
+  margin: 0 var(--page-pad);
+  padding: 18px 0 60px;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 30px;
+  overflow-wrap: break-word;
+}
 
-      isDragging = false;
+footer p {
+  font-size: 24px;
+  margin: 0 0 10px;
+}
 
-      cursorImage.src = normalSVG;
+footer p:first-child {
+  font-size: 22px;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
 
-    });
+footer a:hover {
+  text-decoration: underline;
+}
+
+.footer-mark {
+  font-family: var(--sans);
+  font-size: 30px;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  :root {
+    --page-pad: 28px;
+  }
+
+  .intro h1 {
+    font-size: clamp(40px, 6vw, 58px);
+  }
+
+  .project-images {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .project-letter {
+    display: none;
+  }
+
+  .project-info {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --page-pad: 14px;
+  }
+
+  .project-info {
+    grid-template-columns: 1fr;   /* single column: info block, then description below */
+    padding-top: 12px;
+  }
+
+  .project-info > div:first-child {
+    grid-template-columns: max-content minmax(0, 1fr);   /* Project | Teresa+subtitle */
+    column-gap: 12px;
+    row-gap: 0;
+  }
+
+  .project-info > div:first-child span:first-child {
+    grid-column: 1;
+    grid-row: 1 / span 2;   /* "Project" spans both rows, left column */
+  }
+
+  .project-info > div:first-child strong {
+    grid-column: 2;
+    grid-row: 1;            /* "Teresa" — right column, top row */
+  }
+
+  .project-info > div:first-child span:last-child {
+    grid-column: 2;
+    grid-row: 2;            /* subtitle — right column, under Teresa */
+  }
+
+  .project-description {
+    font-size: 28px;
+    max-width: none;
+  }
+
+  .project-description a {
+    font-size: 20px;   /* mobile-specific size */
+}
+
+  .project {
+    margin-bottom: 18px;   /* smaller gap on mobile */
+    overflow: hidden;
+  }
+
+  .site-header {
+    height: 34px;
+  }
+
+@media (pointer: fine) {
+  
+  html,
+  body,
+  a,
+  button, 
+  .project-images {
+    cursor: none;
+  }
+
+}
+
+  nav {
+    display: none;
+  }
+
+  nav.open {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; 
+    gap: 20px;
+    position: fixed;
+    top: 34px; /* matches your mobile .site-header height */
+    left: 0;
+    right: 0;
+    background: var(--bg);
+    padding: 24px var(--page-pad);
+    border-bottom: 1px solid var(--line);
+    z-index: 99;
+    font-size: 20px; /* adjust as needed */
+  }
+
+  .menu-button {
+    font-size: 24px;   
+    line-height: 1;
+    display: block;
+    border: 0;
+    background: transparent;
+    /*font: inherit;*/
+    padding: 0;
+  }
+
+  .menu-button.is-close {
+    font-family: var(--sans);
+    font-size: 40px;  
+    position: relative;
+    top: -3px;  
+    padding: 0;
+  }
+
+  main {
+    padding-top: 8px;
+  }
+
+  .intro {
+    min-height: 220px;
+    padding-bottom: 45px;
+  }
+
+  .marks {
+    margin-bottom: 14px;
+  }
+
+  .mark {
+    width: 42px;
+    height: 42px;
+  }
+
+  .logo-mark {
+  height: 42px;      /* match old circle height, adjust to taste */
+  width: auto;
+  display: block;
+}
+
+  .mark-a::before {
+    inset: 7px;
+    border-width: 6px;
+  }
+
+  .mark-a::after {
+    inset: 14px;
+  }
+
+  .intro h1 {
+    font-size: clamp(38px, 10vw, 42px);
+    line-height: .96;
+  }
+
+  .section-label {
+    margin-bottom: 12px;
+  }
+
+ .project-images {
+    gap: 8px;
+    /*display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scroll-padding-left: 0;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px; /* small buffer so scrollbar doesn't clip images */
+  }
+
+  .project-images img,
+  .project-images video,
+  .project-letter {
+    flex: 0 0 70%;
+    width: 70%;
+    max-height: 240px;
+    scroll-snap-align: start;
+  }
+
+}
+
+  .project-info {
+    /*margin-top: 12px;    /* ← add this: restores spacing now that images are shorter/contained */
+  }
 
 
-    carousel.addEventListener("mouseleave", () => {
+@media (pointer: coarse) {
 
-      if (isDragging) {
+  #cursor {
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
 
-        isDragging = false;
+  .cursor-trail {
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
 
-        cursorImage.src = normalSVG;
+}
 
-      }
+  footer {
+    margin: 0 var(--page-pad);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: 8px;
+  }
 
-    });
+  footer p {
+    font-size: 18px;
+  }
 
-  });
+  footer p:first-child {
+    font-size: 16px;
+  }
 
+  .footer-mark {
+    font-size: 30px;
+  }
 }
