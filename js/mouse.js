@@ -244,6 +244,15 @@ if (cursor) {
 
   }, { passive: true });
 
+function hideTouchCursor() {
+  cursor.style.opacity = "0";
+  trail.forEach((item) => {
+    item.element.style.opacity = "0";
+  });
+}
+
+document.addEventListener("touchend", hideTouchCursor, { passive: true });
+document.addEventListener("touchcancel", hideTouchCursor, { passive: true });
 
   // =========================================
   // MAIN CURSOR + TRAIL
