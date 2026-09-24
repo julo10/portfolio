@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Cover Artwork — julO</title>
+
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <a class="wordmark" href="../index.html">julO</a>
+
+    <nav>
+      <a href="../index.html#work">Work</a>
+      <a href="../about.html">About</a>
+      <a href="../index.html#contact">Contact</a>
+    </nav>
+
+    <button class="menu-button" aria-label="Open menu">
+      +
+    </button>
+  </header>
+
+
+  <!-- CUSTOM CURSOR -->
+  <div id="cursor">
+    <img src="../images/kiss.svg" alt="">
+  </div>
+
+
+  <main class="covers-full">
+
+    <section class="intro">
+      <h1>Cover Artwork — Digital Rebrand &amp; User Experience.</h1>
+    </section>
+
+    <!-- GROUP 1 -->
+    <section class="cover-fan cover-fan--lg">
+      <img src="../images/BIGA_Portada.webp" alt="BIGA cover artwork">
+      <img src="../images/REFLEX_Portada_003.webp" alt="Reflex cover artwork">
+      <img src="../images/REFLEX_Portada_005.webp" alt="Reflex cover artwork">
+      <img src="../images/GHB_Portada.webp" alt="GHB cover artwork">
+      <img src="../images/Radiografia_PMQQ_Portada.webp" alt="Radiografía PMQQ cover artwork">
+    </section>
+
+    <!-- GROUP 2 -->
+    <section class="cover-fan cover-fan--lg">
+      <img src="../images/BIGA_process_002.webp" alt="BIGA cover artwork">
+      <img src="../images/Radiografia_NSDS_Portada.webp" alt="Reflex cover artwork">
+      <img src="../images/REFLEX_Portada_001.webp" alt="Reflex cover artwork">
+      <img src="../images/Radiografia_LC_Portada.webp" alt="GHB cover artwork">
+      <img src="../images/Radiografia_NSDS_process_001.webp" alt="Radiografía PMQQ cover artwork">
+    </section>
+    
+    <!--
+      MORE GROUPS:
+      Add another <section class="cover-fan cover-fan--lg"> for each
+      extra set of covers (4–5 images works best). They'll each fan
+      out independently as the user scrolls past them.
+
+      <section class="cover-fan cover-fan--lg">
+        <img src="../images/NEXT_COVER_1.webp" alt="">
+        <img src="../images/NEXT_COVER_2.webp" alt="">
+        ...
+      </section>
+    -->
+
+  </main>
+
+
+  <!-- FOOTER -->
+
+  <footer id="contact">
+
+    <div class="footer-mark">
+      julO
+    </div>
+
+    <div>
+
+      <p>CONTACT</p>
+
+      <p>
+        <a href="mailto:julia10lopez@gmail.com">
+          julia10lopez@gmail.com
+        </a>
+      </p>
+
+    </div>
+
+    <div>
+
+      <p>SOCIAL</p>
+
+      <p>
+        <a
+          href="https://instagram.com/julo.lo"
+          target="_blank"
+          rel="noopener"
+        >
+          Instagram
+        </a>
+        <br>
+
+        <a
+          href="https://www.behance.net/julialopezmartinez"
+          target="_blank"
+          rel="noopener"
+        >
+          Behance
+        </a>
+        <br>
+
+        <a
+          href="https://www.linkedin.com/in/julialopezvfx/"
+          target="_blank"
+          rel="noopener"
+        >
+          LinkedIn
+        </a>
+      </p>
+
+    </div>
+
+    <div>
+
+      <p>OFFICE</p>
+
+      <p>
+        Barcelona<br>
+        08026
+      </p>
+
+    </div>
+
+  </footer>
+
+
+  <!-- SCRIPTS: LOAD ONCE -->
+
+  <script src="../js/main.js"></script>
+  <script src="../js/mouse.js"></script>
+  <script src="../js/cover.js"></script>
+  <script>
+    // Larger, more extended version of the fan effect for this page.
+    initCoverScatter('.cover-fan--lg', {
+      scale: 1.8,
+      mobileScale: 0.8,
+      targets: [
+        { x: -220, y: -14, r: -12 },
+        { x: -95,  y: 18,  r: -5  },
+        { x: 0,    y: -30, r: 3   },
+        { x: 105,  y: 20,  r: 7   },
+        { x: 220,  y: -10, r: 14  },
+      ]
+    });
+  </script>
+
+</body>
+</html>
