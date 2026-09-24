@@ -432,6 +432,50 @@ main {
   color: #666;
 }
 
+/* =========================================
+   PROJECT COVERS
+========================================= */
+
+.cover-fan {
+  position: relative;
+  display: block;
+  height: clamp(260px, 32vw, 420px);
+}
+
+.cover-fan img {
+  position: absolute;
+  top: 0;
+  width: 30%;
+  max-width: 320px;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .15);
+  transition: box-shadow 200ms ease;
+  will-change: transform;
+}
+
+.cover-fan img:nth-child(1) { left: 0%;  z-index: 5; }
+.cover-fan img:nth-child(2) { left: 6%;  z-index: 4; }
+.cover-fan img:nth-child(3) { left: 12%; z-index: 3; }
+.cover-fan img:nth-child(4) { left: 18%; z-index: 2; }
+.cover-fan img:nth-child(5) { left: 24%; z-index: 1; }
+
+.cover-fan--lg {
+  height: clamp(360px, 42vw, 560px);
+  margin: 0 auto 140px;
+  max-width: 900px;
+}
+
+.cover-fan--lg img {
+  max-width: 380px;
+}
+
+
+/* =========================================
+   HIDDEN MORE PROJECTS
+========================================= */
+
 .hidden-project {
   display: none;
 }
@@ -725,6 +769,13 @@ footer a:hover {
     /*margin-top: 12px;    /* ← add this: restores spacing now that images are shorter/contained */
   }
 
+  .cover-fan {
+    height: clamp(180px, 60vw, 260px);
+  }
+  .cover-fan--lg {
+    height: clamp(220px, 70vw, 320px);
+    margin-bottom: 60px;
+  }
 
 @media (pointer: coarse) {
 
