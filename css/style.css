@@ -825,12 +825,3 @@ footer a:hover {
     font-size: 30px;
   }
 }
-
-.project-images img {
-  outline: 2px solid magenta !important;
-  background: magenta !important;
-}
-
-body {
-  background: magenta !important;
-}
