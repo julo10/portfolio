@@ -1,35 +1,40 @@
-document.querySelector('.menu-button')?.addEventListener('click', () => {
-  const nav = document.querySelector('.site-header nav');
-  const btn = document.querySelector('.menu-button');
+document.querySelector(".menu-button")?.addEventListener("click", () => {
+  const nav = document.querySelector(".site-header nav");
+  const btn = document.querySelector(".menu-button");
   if (!nav) return;
 
-  nav.classList.toggle('open');
-  const isOpen = nav.classList.contains('open');
-  btn.textContent = isOpen ? '-' : '+';
-  btn.classList.toggle('is-close', isOpen);
+  nav.classList.toggle("open");
+  const isOpen = nav.classList.contains("open");
+  btn.textContent = isOpen ? "-" : "+";
+  btn.classList.toggle("is-close", isOpen);
 });
 
-document.querySelectorAll('.site-header nav a').forEach(link => {
-  link.addEventListener('click', () => {
-    const nav = document.querySelector('.site-header nav');
-    const btn = document.querySelector('.menu-button');
-    nav.classList.remove('open');
-    btn.textContent = '+';
-    btn.classList.remove('is-close');
+document.querySelectorAll(".site-header nav a").forEach((link) => {
+  link.addEventListener("click", () => {
+    const nav = document.querySelector(".site-header nav");
+    const btn = document.querySelector(".menu-button");
+    nav?.classList.remove("open");
+
+    if (btn) {
+      btn.textContent = "+";
+      btn.classList.remove("is-close");
+    }
   });
 });
 
-// Play/pause project videos on scroll visibility
-const scrollVideos = document.querySelectorAll('.scroll-video');
+
+// Play or pause project videos based on visibility.
+const scrollVideos = document.querySelectorAll(".scroll-video");
 
 if (scrollVideos.length) {
   const videoObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         const video = entry.target;
+
         if (entry.isIntersecting) {
           video.play().catch(() => {
-            // autoplay can be blocked in some browsers; fail silently
+            // Autoplay may be blocked by the browser.
           });
         } else {
           video.pause();
@@ -37,126 +42,80 @@ if (scrollVideos.length) {
       });
     },
     {
-      threshold: 0.4, // video is ~40% visible before it starts playing
+      threshold: 0.4,
     }
   );
 
   scrollVideos.forEach((video) => videoObserver.observe(video));
 }
 
-// Make the button "More Projects" reveal hidden projects
+
+// Show or hide the additional projects.
 const moreButton = document.getElementById("more-projects-button");
 
 if (moreButton) {
   moreButton.addEventListener("click", () => {
     const hiddenProjects = document.querySelectorAll(".hidden-project");
-
     const isExpanded = moreButton.dataset.expanded === "true";
 
-    hiddenProjects.forEach(project => {
+    hiddenProjects.forEach((project) => {
       project.style.display = isExpanded ? "none" : "block";
     });
 
     moreButton.dataset.expanded = isExpanded ? "false" : "true";
-
     moreButton.textContent = isExpanded
       ? "More Projects +"
       : "Less Projects −";
   });
 }
 
-  /* ==================================================================================================================== */
 
+// Carousel interactions.
 const carousels = document.querySelectorAll(".project-images");
 
 carousels.forEach((carousel) => {
-  /* =========================
-     STATE
-  ========================= */
-
   let isDragging = false;
   let hasDragged = false;
-
   let startX = 0;
   let startScrollLeft = 0;
+  let animationFrame = null;
 
   const DRAG_THRESHOLD = 6;
 
-  let animationFrame = null;
 
-
-  /* =========================
-     UPDATE IMAGE BLUR
-  ========================= */
-
+  // Blur images according to how much of each image is visible.
   function updateImageBlur() {
     const carouselRect = carousel.getBoundingClientRect();
-
     const viewportLeft = carouselRect.left;
     const viewportRight = carouselRect.right;
-
     const images = carousel.querySelectorAll("img, video");
 
     images.forEach((image) => {
       const rect = image.getBoundingClientRect();
-
-      const imageLeft = rect.left;
-      const imageRight = rect.right;
       const imageWidth = rect.width;
 
       if (imageWidth <= 0) return;
 
-      const visibleLeft = Math.max(
-        imageLeft,
-        viewportLeft
-      );
-
-      const visibleRight = Math.min(
-        imageRight,
-        viewportRight
-      );
-
-      const visibleWidth = Math.max(
-        0,
-        visibleRight - visibleLeft
-      );
-
+      const visibleLeft = Math.max(rect.left, viewportLeft);
+      const visibleRight = Math.min(rect.right, viewportRight);
+      const visibleWidth = Math.max(0, visibleRight - visibleLeft);
       const visibility = visibleWidth / imageWidth;
-
-
-      /* Fully visible = completely sharp */
 
       if (visibility >= 0.999) {
         image.style.filter = "blur(0px)";
         return;
       }
 
-
-      /* Completely outside = maximum blur */
-
       if (visibility <= 0) {
         image.style.filter = "blur(14px)";
         return;
       }
 
-
-      /* Partially visible = progressive blur */
-
-      const blurProgress =
-        Math.pow(1 - visibility, 1.4);
-
-      const blur =
-        blurProgress * 14;
-
-      image.style.filter =
-        `blur(${blur}px)`;
+      const blurProgress = Math.pow(1 - visibility, 1.4);
+      image.style.filter = `blur(${blurProgress * 14}px)`;
     });
   }
 
-
-  /* =========================
-     SMOOTH BLUR UPDATES
-  ========================= */
 
   function requestBlurUpdate() {
     if (animationFrame) return;
@@ -168,325 +127,233 @@ carousels.forEach((carousel) => {
   }
 
 
-  /* =========================
-     POINTER DOWN
-  ========================= */
-
-  carousel.addEventListener("pointerdown", (e) => {
-
-    // Only use the primary mouse button
-    if (e.pointerType === "mouse" && e.button !== 0) {
+  // Drag the carousel with the mouse or pointer.
+  carousel.addEventListener("pointerdown", (event) => {
+    if (event.pointerType === "mouse" && event.button !== 0) {
       return;
     }
 
-  clearTimeout(autoScrollTimer);
+    clearTimeout(autoScrollTimer);
 
-  if (autoScrollAnimation) {
-    cancelAnimationFrame(autoScrollAnimation);
-    autoScrollAnimation = null;
-  }
+    if (autoScrollAnimation) {
+      cancelAnimationFrame(autoScrollAnimation);
+      autoScrollAnimation = null;
+    }
 
-  isAutoScrolling = false;
-
+    isAutoScrolling = false;
     isDragging = true;
     hasDragged = false;
-
-    startX = e.clientX;
+    startX = event.clientX;
     startScrollLeft = carousel.scrollLeft;
 
     carousel.classList.add("is-dragging");
-
-    // Keep receiving pointer events even outside carousel
-    carousel.setPointerCapture(e.pointerId);
-
-    e.preventDefault();
+    carousel.setPointerCapture(event.pointerId);
+    event.preventDefault();
   });
 
 
-  /* =========================
-     POINTER MOVE
-  ========================= */
-
-  carousel.addEventListener("pointermove", (e) => {
-
+  carousel.addEventListener("pointermove", (event) => {
     if (!isDragging) return;
 
-    const distance = e.clientX - startX;
-
-
-    /*
-     * Only turn the interaction into a drag
-     * after the pointer has moved enough.
-     */
+    const distance = event.clientX - startX;
 
     if (Math.abs(distance) > DRAG_THRESHOLD) {
       hasDragged = true;
     }
 
+    if (!hasDragged) return;
 
-    /*
-     * If this is still just a click,
-     * don't move the carousel.
-     */
-
-    if (!hasDragged) {
-      return;
-    }
-
-
-    /*
-     * Move carousel freely.
-     */
-
-    carousel.scrollLeft =
-      startScrollLeft - distance * 1.2;
-
+    carousel.scrollLeft = startScrollLeft - distance * 1.2;
     requestBlurUpdate();
-
-    e.preventDefault();
+    event.preventDefault();
   });
 
 
-  /* =========================
-     STOP DRAGGING
-  ========================= */
-
-  function stopDragging(e) {
-
+  function stopDragging(event) {
     if (!isDragging) return;
 
     isDragging = false;
-
     carousel.classList.remove("is-dragging");
 
     if (
-      e.pointerId !== undefined &&
-      carousel.hasPointerCapture(e.pointerId)
+      event.pointerId !== undefined &&
+      carousel.hasPointerCapture(event.pointerId)
     ) {
-      carousel.releasePointerCapture(e.pointerId);
+      carousel.releasePointerCapture(event.pointerId);
     }
 
     requestBlurUpdate();
   }
 
-
-  carousel.addEventListener(
-    "pointerup",
-    stopDragging
-  );
-
-  carousel.addEventListener(
-    "pointercancel",
-    stopDragging
-  );
+  carousel.addEventListener("pointerup", stopDragging);
+  carousel.addEventListener("pointercancel", stopDragging);
 
 
-  /* =========================
-     BLOCK CLICK AFTER DRAG
-  ========================= */
+  // Prevent a drag from opening the project link.
+  carousel.addEventListener("click", (event) => {
+    if (!hasDragged) return;
 
-  carousel.addEventListener("click", (e) => {
-
-    /*
-     * If the user actually dragged,
-     * prevent the link from opening.
-     */
-
-    if (hasDragged) {
-
-      e.preventDefault();
-      e.stopPropagation();
-
-      hasDragged = false;
-    }
+    event.preventDefault();
+    event.stopPropagation();
+    hasDragged = false;
   });
 
 
-  /* =========================
-     UPDATE WHILE SCROLLING
-  ========================= */
+  carousel.addEventListener("scroll", requestBlurUpdate, {
+    passive: true,
+  });
 
-  carousel.addEventListener(
-    "scroll",
-    requestBlurUpdate,
-    { passive: true }
-  );
+  window.addEventListener("resize", requestBlurUpdate);
 
-
-  /* =========================
-     RESIZE
-  ========================= */
-
-  window.addEventListener(
-    "resize",
-    requestBlurUpdate
-  );
-
-
-  /* =========================
-     IMAGE LOAD
-  ========================= */
-
-  carousel.querySelectorAll("img").forEach((img) => {
-
-    if (img.complete) {
+  carousel.querySelectorAll("img").forEach((image) => {
+    if (image.complete) {
       requestBlurUpdate();
     }
 
-    img.addEventListener(
-      "load",
-      requestBlurUpdate
-    );
+    image.addEventListener("load", requestBlurUpdate);
   });
 
 
-  /* =========================
-     INITIAL UPDATE
-  ========================= */
+  // Automatically advance the carousel.
+  let autoScrollTimer;
+  let autoScrollAnimation;
+  let isAutoScrolling = false;
 
-  requestBlurUpdate();
+  const AUTO_DELAY = 4000;
+  const AUTO_DURATION = 1800;
 
+  function startAutoScroll() {
+    clearTimeout(autoScrollTimer);
 
-/* =========================
-   AUTOMATIC SCROLL
-========================= */
+    autoScrollTimer = setTimeout(() => {
+      if (isDragging) {
+        startAutoScroll();
+        return;
+      }
 
-let autoScrollTimer;
-let autoScrollAnimation;
-let isAutoScrolling = false;
+      const maxScroll = carousel.scrollWidth - carousel.clientWidth;
 
-const AUTO_DELAY = 4000;      // wait 4 seconds
-const AUTO_DISTANCE = 1;      // pixels per frame
-const AUTO_DURATION = 1800;   // 1.8 second movement
+      if (carousel.scrollLeft >= maxScroll - 2) {
+        carousel.scrollTo({
+          left: 0,
+          behavior: "smooth",
+        });
 
+        requestBlurUpdate();
+        startAutoScroll();
+        return;
+      }
 
-function startAutoScroll() {
-
-  clearTimeout(autoScrollTimer);
-
-  autoScrollTimer = setTimeout(() => {
-
-    if (isDragging) {
-      startAutoScroll();
-      return;
-    }
-
-    const maxScroll =
-      carousel.scrollWidth -
-      carousel.clientWidth;
-
-    /*
-     * If we're already at the end,
-     * return to the beginning.
-     */
-
-    if (carousel.scrollLeft >= maxScroll - 2) {
-
-      carousel.scrollTo({
-        left: 0,
-        behavior: "smooth"
-      });
-
-      requestBlurUpdate();
-
-      startAutoScroll();
-
-      return;
-    }
-
-
-    /* =========================
-       MOVE FORWARD
-    ========================= */
-
-    const startPosition =
-      carousel.scrollLeft;
-
-    const targetPosition =
-      Math.min(
+      const startPosition = carousel.scrollLeft;
+      const targetPosition = Math.min(
         startPosition + carousel.clientWidth * 0.33,
         maxScroll
       );
+      const distance = targetPosition - startPosition;
+      const startTime = performance.now();
 
-    const distance =
-      targetPosition - startPosition;
+      isAutoScrolling = true;
 
-    const startTime =
-      performance.now();
+      function animateAutoScroll(currentTime) {
+        if (isDragging) {
+          isAutoScrolling = false;
+          return;
+        }
 
-    isAutoScrolling = true;
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / AUTO_DURATION, 1);
+
+        const eased =
+          progress < 0.5
+            ? 2 * progress * progress
+            : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+        carousel.scrollLeft = startPosition + distance * eased;
+        requestBlurUpdate();
+
+        if (progress < 1) {
+          autoScrollAnimation = requestAnimationFrame(animateAutoScroll);
+        } else {
+          isAutoScrolling = false;
+          startAutoScroll();
+        }
+      }
+
+      autoScrollAnimation = requestAnimationFrame(animateAutoScroll);
+    }, AUTO_DELAY);
+  }
 
 
-    function animateAutoScroll(currentTime) {
+  // Respond to vertical scrolling anywhere on the page.
+  window.addEventListener(
+    "wheel",
+    (event) => {
+      // Leave horizontal trackpad scrolling alone.
+      if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
 
-      /*
-       * User started dragging.
-       * Stop automatic movement.
-       */
+      const viewportCenter = window.innerHeight / 2;
 
-      if (isDragging) {
-        isAutoScrolling = false;
+      // Choose the visible carousel closest to the screen center.
+      const activeCarousel = [...carousels]
+        .filter((item) => {
+          const rect = item.getBoundingClientRect();
+          return rect.bottom > 0 && rect.top < window.innerHeight;
+        })
+        .sort((a, b) => {
+          const rectA = a.getBoundingClientRect();
+          const rectB = b.getBoundingClientRect();
+          const centerA = (rectA.top + rectA.bottom) / 2;
+          const centerB = (rectB.top + rectB.bottom) / 2;
+
+          return (
+            Math.abs(centerA - viewportCenter) -
+            Math.abs(centerB - viewportCenter)
+          );
+        })[0];
+
+      if (activeCarousel !== carousel) return;
+
+      const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+      if (maxScroll <= 0) return;
+
+      // Let the page scroll normally when the carousel reaches either end.
+      if (
+        (event.deltaY > 0 && carousel.scrollLeft >= maxScroll) ||
+        (event.deltaY < 0 && carousel.scrollLeft <= 0)
+      ) {
         return;
       }
 
 
-      const elapsed =
-        currentTime - startTime;
+      // Pause autoplay while the user scrolls, then restart its timer.
+      clearTimeout(autoScrollTimer);
 
-      const progress =
-        Math.min(
-          elapsed / AUTO_DURATION,
-          1
-        );
-
-
-      /*
-       * Smooth ease-in-out
-       */
-
-      const eased =
-        progress < 0.5
-          ? 2 * progress * progress
-          : 1 -
-            Math.pow(
-              -2 * progress + 2,
-              2
-            ) / 2;
-
-
-      carousel.scrollLeft =
-        startPosition +
-        distance * eased;
-
-
-      requestBlurUpdate();
-
-
-      if (progress < 1) {
-
-        autoScrollAnimation =
-          requestAnimationFrame(
-            animateAutoScroll
-          );
-
-      } else {
-
-        isAutoScrolling = false;
-
-        startAutoScroll();
+      if (autoScrollAnimation) {
+        cancelAnimationFrame(autoScrollAnimation);
+        autoScrollAnimation = null;
       }
-    }
+
+      isAutoScrolling = false;
+
+      
+     const targetScroll = Math.max(
+      0,
+      Math.min(maxScroll, carousel.scrollLeft + event.deltaY * 1.5)
+    );
+
+    carousel.scrollTo({
+      left: targetScroll,
+      behavior: "smooth",
+    });
+
+    requestBlurUpdate();
+    startAutoScroll();  
+    
+    },
+    { passive: false }
+  );
 
 
-    autoScrollAnimation =
-      requestAnimationFrame(
-        animateAutoScroll
-      );
-
-  }, AUTO_DELAY);
-}
-
-
-startAutoScroll();
-
+  requestBlurUpdate();
+  startAutoScroll();
 });
