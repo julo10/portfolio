@@ -1,492 +1,440 @@
-document.querySelector('.menu-button')?.addEventListener('click', () => {
-  const nav = document.querySelector('.site-header nav');
-  const btn = document.querySelector('.menu-button');
-  if (!nav) return;
+const cursor = document.getElementById("cursor");
 
-  nav.classList.toggle('open');
-  const isOpen = nav.classList.contains('open');
-  btn.textContent = isOpen ? '-' : '+';
-  btn.classList.toggle('is-close', isOpen);
-});
+if (cursor) {
 
-document.querySelectorAll('.site-header nav a').forEach(link => {
-  link.addEventListener('click', () => {
-    const nav = document.querySelector('.site-header nav');
-    const btn = document.querySelector('.menu-button');
-    nav.classList.remove('open');
-    btn.textContent = '+';
-    btn.classList.remove('is-close');
-  });
-});
+  const cursorImage = cursor.querySelector("img");
 
-// Play/pause project videos on scroll visibility
-const scrollVideos = document.querySelectorAll('.scroll-video');
+  const basePath = window.location.pathname.includes("/projects/")
+    ? "../images/"
+    : "images/";
 
-if (scrollVideos.length) {
-  const videoObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        const video = entry.target;
-        if (entry.isIntersecting) {
-          video.play().catch(() => {
-            // autoplay can be blocked in some browsers; fail silently
-          });
-        } else {
-          video.pause();
-        }
-      });
-    },
-    {
-      threshold: 0.4, // video is ~40% visible before it starts playing
-    }
-  );
+  const normalSVG = basePath + "kiss.svg";
+  const dragSVG = basePath + "kiss_drag.svg";
 
-  scrollVideos.forEach((video) => videoObserver.observe(video));
-}
 
-// Make the button "More Projects" reveal hidden projects
-const moreButton = document.getElementById("more-projects-button");
+  // =========================================
+  // SETTINGS
+  // =========================================
 
-if (moreButton) {
-  moreButton.addEventListener("click", () => {
-    const hiddenProjects = document.querySelectorAll(".hidden-project");
+  const TRAIL_COUNT = 10;
 
-    const isExpanded = moreButton.dataset.expanded === "true";
+  // Main cursor
+  const CURSOR_SMOOTHING = 0.25;
 
-    hiddenProjects.forEach(project => {
-      project.style.display = isExpanded ? "none" : "block";
-    });
+  // Trail
+  const TRAIL_SMOOTHING = 0.26;
 
-    moreButton.dataset.expanded = isExpanded ? "false" : "true";
+  // Trail starts at this size and gradually becomes smaller
+  const TRAIL_START_SIZE = 34;
+  const TRAIL_END_SIZE = 10;
 
-    moreButton.textContent = isExpanded
-      ? "More Projects +"
-      : "Less Projects −";
-  });
-}
+  // Trail starts visible and gradually disappears
+  const TRAIL_START_OPACITY = 0.30;
+  const TRAIL_END_OPACITY = 0;
 
-  /* ==================================================================================================================== */
 
-const carousels = document.querySelectorAll(".project-images");
+  // =========================================
+  // CURSOR STATE
+  // =========================================
 
-carousels.forEach((carousel) => {
-  /* =========================
-     STATE
-  ========================= */
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
+
+  let cursorX = mouseX;
+  let cursorY = mouseY;
 
   let isDragging = false;
-  let hasDragged = false;
 
-  let startX = 0;
-  let startScrollLeft = 0;
-
-  const DRAG_THRESHOLD = 6;
-
-  let animationFrame = null;
+  // Has the user actually interacted with the screen?
+  let hasPointerMoved = false;
 
 
-  /* =========================
-     UPDATE IMAGE BLUR
-  ========================= */
+  // =========================================
+  // MOBILE INITIAL STATE
+  // =========================================
 
-  function updateImageBlur() {
-    const carouselRect = carousel.getBoundingClientRect();
+  /*
+   * On touch devices there is no mouse cursor.
+   * Therefore the kiss should not sit permanently
+   * in the middle of the screen before interaction.
+   */
 
-    const viewportLeft = carouselRect.left;
-    const viewportRight = carouselRect.right;
+  if (window.matchMedia("(pointer: coarse)").matches) {
+    cursor.style.opacity = "0";
 
-    const images = carousel.querySelectorAll("img, video");
-
-    images.forEach((image) => {
-      const rect = image.getBoundingClientRect();
-
-      const imageLeft = rect.left;
-      const imageRight = rect.right;
-      const imageWidth = rect.width;
-
-      if (imageWidth <= 0) return;
-
-      const visibleLeft = Math.max(
-        imageLeft,
-        viewportLeft
-      );
-
-      const visibleRight = Math.min(
-        imageRight,
-        viewportRight
-      );
-
-      const visibleWidth = Math.max(
-        0,
-        visibleRight - visibleLeft
-      );
-
-      const visibility = visibleWidth / imageWidth;
-
-
-      /* Fully visible = completely sharp */
-
-      if (visibility >= 0.999) {
-        image.style.filter = "blur(0px)";
-        return;
-      }
-
-
-      /* Completely outside = maximum blur */
-
-      if (visibility <= 0) {
-        image.style.filter = "blur(14px)";
-        return;
-      }
-
-
-      /* Partially visible = progressive blur */
-
-      const blurProgress =
-        Math.pow(1 - visibility, 1.4);
-
-      const blur =
-        blurProgress * 14;
-
-      image.style.filter =
-        `blur(${blur}px)`;
+    document.querySelectorAll(".cursor-trail").forEach((element) => {
+      element.style.opacity = "0";
     });
   }
 
 
-  /* =========================
-     SMOOTH BLUR UPDATES
-  ========================= */
+  // =========================================
+  // CREATE TRAIL
+  // =========================================
 
-  function requestBlurUpdate() {
-    if (animationFrame) return;
+  const trail = [];
 
-    animationFrame = requestAnimationFrame(() => {
-      updateImageBlur();
-      animationFrame = null;
-    });
-  }
+  for (let i = 0; i < TRAIL_COUNT; i++) {
 
+    const element = document.createElement("div");
 
-  /* =========================
-     POINTER DOWN
-  ========================= */
+    element.className = "cursor-trail";
 
-  carousel.addEventListener("pointerdown", (e) => {
+    const image = document.createElement("img");
 
-    // Only use the primary mouse button
-    if (e.pointerType === "mouse" && e.button !== 0) {
-      return;
-    }
+    image.src = normalSVG;
+    image.alt = "";
 
-  clearTimeout(autoScrollTimer);
-
-  if (autoScrollAnimation) {
-    cancelAnimationFrame(autoScrollAnimation);
-    autoScrollAnimation = null;
-  }
-
-  isAutoScrolling = false;
-
-    isDragging = true;
-    hasDragged = false;
-
-    startX = e.clientX;
-    startScrollLeft = carousel.scrollLeft;
-
-    carousel.classList.add("is-dragging");
-
-    // Keep receiving pointer events even outside carousel
-    carousel.setPointerCapture(e.pointerId);
-
-    e.preventDefault();
-  });
-
-
-  /* =========================
-     POINTER MOVE
-  ========================= */
-
-  carousel.addEventListener("pointermove", (e) => {
-
-    if (!isDragging) return;
-
-    const distance = e.clientX - startX;
+    element.appendChild(image);
+    document.body.appendChild(element);
 
 
     /*
-     * Only turn the interaction into a drag
-     * after the pointer has moved enough.
+     * Progress:
+     * 0 = first trail element
+     * 1 = last trail element
      */
 
-    if (Math.abs(distance) > DRAG_THRESHOLD) {
-      hasDragged = true;
-    }
+    const progress = i / (TRAIL_COUNT - 1);
 
 
     /*
-     * If this is still just a click,
-     * don't move the carousel.
+     * Size gets smaller toward the end.
      */
 
-    if (!hasDragged) {
-      return;
-    }
+    const size =
+      TRAIL_START_SIZE +
+      (TRAIL_END_SIZE - TRAIL_START_SIZE) * progress;
 
 
     /*
-     * Move carousel freely.
+     * Opacity gets lower toward the end.
      */
 
-    carousel.scrollLeft =
-      startScrollLeft - distance * 1.2;
-
-    requestBlurUpdate();
-
-    e.preventDefault();
-  });
+    const opacity =
+      TRAIL_START_OPACITY +
+      (TRAIL_END_OPACITY - TRAIL_START_OPACITY) * progress;
 
 
-  /* =========================
-     STOP DRAGGING
-  ========================= */
-
-  function stopDragging(e) {
-
-    if (!isDragging) return;
-
-    isDragging = false;
-
-    carousel.classList.remove("is-dragging");
-
-    if (
-      e.pointerId !== undefined &&
-      carousel.hasPointerCapture(e.pointerId)
-    ) {
-      carousel.releasePointerCapture(e.pointerId);
-    }
-
-    requestBlurUpdate();
-  }
+    element.style.width = `${size}px`;
+    element.style.height = `${size}px`;
+    element.style.opacity = opacity;
 
 
-  carousel.addEventListener(
-    "pointerup",
-    stopDragging
-  );
+    trail.push({
+      element,
 
-  carousel.addEventListener(
-    "pointercancel",
-    stopDragging
-  );
-
-
-  /* =========================
-     BLOCK CLICK AFTER DRAG
-  ========================= */
-
-  carousel.addEventListener("click", (e) => {
-
-    /*
-     * If the user actually dragged,
-     * prevent the link from opening.
-     */
-
-    if (hasDragged) {
-
-      e.preventDefault();
-      e.stopPropagation();
-
-      hasDragged = false;
-    }
-  });
-
-
-  /* =========================
-     UPDATE WHILE SCROLLING
-  ========================= */
-
-  carousel.addEventListener(
-    "scroll",
-    requestBlurUpdate,
-    { passive: true }
-  );
-
-
-  /* =========================
-     RESIZE
-  ========================= */
-
-  window.addEventListener(
-    "resize",
-    requestBlurUpdate
-  );
-
-
-  /* =========================
-     IMAGE LOAD
-  ========================= */
-
-  carousel.querySelectorAll("img").forEach((img) => {
-
-    if (img.complete) {
-      requestBlurUpdate();
-    }
-
-    img.addEventListener(
-      "load",
-      requestBlurUpdate
-    );
-  });
-
-
-  /* =========================
-     INITIAL UPDATE
-  ========================= */
-
-  requestBlurUpdate();
-
-
-/* =========================
-   AUTOMATIC SCROLL
-========================= */
-
-let autoScrollTimer;
-let autoScrollAnimation;
-let isAutoScrolling = false;
-
-const AUTO_DELAY = 4000;      // wait 4 seconds
-const AUTO_DISTANCE = 1;      // pixels per frame
-const AUTO_DURATION = 1800;   // 1.8 second movement
-
-
-function startAutoScroll() {
-
-  clearTimeout(autoScrollTimer);
-
-  autoScrollTimer = setTimeout(() => {
-
-    if (isDragging) {
-      startAutoScroll();
-      return;
-    }
-
-    const maxScroll =
-      carousel.scrollWidth -
-      carousel.clientWidth;
-
-    /*
-     * If we're already at the end,
-     * return to the beginning.
-     */
-
-    if (carousel.scrollLeft >= maxScroll - 2) {
-
-      carousel.scrollTo({
-        left: 0,
-        behavior: "smooth"
-      });
-
-      requestBlurUpdate();
-
-      startAutoScroll();
-
-      return;
-    }
-
-
-    /* =========================
-       MOVE FORWARD
-    ========================= */
-
-    const startPosition =
-      carousel.scrollLeft;
-
-    const targetPosition =
-      Math.min(
-        startPosition + carousel.clientWidth * 0.33,
-        maxScroll
-      );
-
-    const distance =
-      targetPosition - startPosition;
-
-    const startTime =
-      performance.now();
-
-    isAutoScrolling = true;
-
-
-    function animateAutoScroll(currentTime) {
+      x: mouseX,
+      y: mouseY,
 
       /*
-       * User started dragging.
-       * Stop automatic movement.
+       * Later trail elements move slightly slower.
+       * This creates a smoother, longer tail.
        */
+
+      smoothing:
+        TRAIL_SMOOTHING -
+        progress * 0.07
+    });
+  }
+
+
+  // =========================================
+  // POINTER POSITION
+  // =========================================
+
+  document.addEventListener("pointermove", (e) => {
+
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+
+    hasPointerMoved = true;
+
+    /*
+     * Show cursor after first interaction.
+     */
+
+    cursor.style.opacity = "1";
+
+    /*
+     * Restore trail opacity.
+     */
+
+    trail.forEach((item, index) => {
+
+      const progress = index / (TRAIL_COUNT - 1);
+
+      const opacity =
+        TRAIL_START_OPACITY +
+        (TRAIL_END_OPACITY - TRAIL_START_OPACITY) * progress;
+
+      item.element.style.opacity = opacity;
+
+    });
+
+  });
+
+
+  // =========================================
+  // TOUCH POSITION
+  // =========================================
+
+  /*
+   * Some mobile browsers may not continuously
+   * dispatch pointermove during certain touch
+   * interactions, so also listen directly to touchmove.
+   */
+
+  document.addEventListener("touchmove", (e) => {
+
+    if (!e.touches.length) return;
+
+    const touch = e.touches[0];
+
+    mouseX = touch.clientX;
+    mouseY = touch.clientY;
+
+    hasPointerMoved = true;
+
+    cursor.style.opacity = "1";
+
+    trail.forEach((item, index) => {
+
+      const progress = index / (TRAIL_COUNT - 1);
+
+      const opacity =
+        TRAIL_START_OPACITY +
+        (TRAIL_END_OPACITY - TRAIL_START_OPACITY) * progress;
+
+      item.element.style.opacity = opacity;
+
+    });
+
+  }, { passive: true });
+
+
+  // =========================================
+  // TOUCH START
+  // =========================================
+
+  document.addEventListener("touchstart", (e) => {
+
+    if (!e.touches.length) return;
+
+    const touch = e.touches[0];
+
+    mouseX = touch.clientX;
+    mouseY = touch.clientY;
+
+    hasPointerMoved = true;
+
+    cursor.style.opacity = "1";
+
+    trail.forEach((item, index) => {
+
+      const progress = index / (TRAIL_COUNT - 1);
+
+      const opacity =
+        TRAIL_START_OPACITY +
+        (TRAIL_END_OPACITY - TRAIL_START_OPACITY) * progress;
+
+      item.element.style.opacity = opacity;
+
+    });
+
+  }, { passive: true });
+
+
+  // =========================================
+  // MAIN CURSOR + TRAIL
+  // =========================================
+
+  function animateCursor() {
+
+    /*
+     * Smooth main cursor
+     */
+
+    cursorX +=
+      (mouseX - cursorX) *
+      CURSOR_SMOOTHING;
+
+    cursorY +=
+      (mouseY - cursorY) *
+      CURSOR_SMOOTHING;
+
+
+    /*
+     * Only move the cursor once the user
+     * has actually interacted with the screen.
+     */
+
+    if (hasPointerMoved) {
+
+      cursor.style.left = `${cursorX}px`;
+      cursor.style.top = `${cursorY}px`;
+
+    }
+
+
+    // =========================================
+    // TRAIL
+    // =========================================
+
+    let previousX = cursorX;
+    let previousY = cursorY;
+
+    trail.forEach((item) => {
+
+      item.x +=
+        (previousX - item.x) *
+        item.smoothing;
+
+      item.y +=
+        (previousY - item.y) *
+        item.smoothing;
+
+      item.element.style.left = `${item.x}px`;
+      item.element.style.top = `${item.y}px`;
+
+      previousX = item.x;
+      previousY = item.y;
+
+    });
+
+
+    requestAnimationFrame(animateCursor);
+  }
+
+  animateCursor();
+
+
+  // =========================================
+  // CLICK / TOUCH ANIMATION
+  // =========================================
+
+  document.addEventListener("mousedown", () => {
+
+    cursor.classList.remove("clicked");
+
+    // Force animation restart
+    void cursor.offsetWidth;
+
+    cursor.classList.add("clicked");
+
+  });
+
+
+  document.addEventListener("touchstart", () => {
+
+    cursor.classList.remove("clicked");
+
+    // Force animation restart
+    void cursor.offsetWidth;
+
+    cursor.classList.add("clicked");
+
+  }, { passive: true });
+
+
+  // =========================================
+  // REMOVE CLICK STATE
+  // =========================================
+
+  cursor.addEventListener("animationend", () => {
+
+    cursor.classList.remove("clicked");
+
+  });
+
+
+  // =========================================
+  // CAROUSEL DRAG
+  // =========================================
+
+  const carousels =
+    document.querySelectorAll(".project-images");
+
+
+  carousels.forEach((carousel) => {
+
+    carousel.addEventListener("pointermove", (e) => {
+
+      /*
+       * Keep cursor position synchronized with
+       * the carousel while interacting with it.
+       */
+
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+
+      hasPointerMoved = true;
+
+      cursor.style.opacity = "1";
+
+
+      if (
+        carousel.classList.contains("is-dragging") &&
+        !isDragging
+      ) {
+
+        isDragging = true;
+
+        cursorImage.src = dragSVG;
+
+      }
+
+    });
+
+
+    carousel.addEventListener("pointerdown", (e) => {
+
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+
+      hasPointerMoved = true;
+
+      cursor.style.opacity = "1";
+
+    });
+
+
+    carousel.addEventListener("pointerup", (e) => {
+
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+
+      isDragging = false;
+
+      cursorImage.src = normalSVG;
+
+    });
+
+
+    carousel.addEventListener("pointercancel", (e) => {
+
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+
+      isDragging = false;
+
+      cursorImage.src = normalSVG;
+
+    });
+
+
+    carousel.addEventListener("mouseleave", () => {
 
       if (isDragging) {
-        isAutoScrolling = false;
-        return;
+
+        isDragging = false;
+
+        cursorImage.src = normalSVG;
+
       }
 
+    });
 
-      const elapsed =
-        currentTime - startTime;
+  });
 
-      const progress =
-        Math.min(
-          elapsed / AUTO_DURATION,
-          1
-        );
-
-
-      /*
-       * Smooth ease-in-out
-       */
-
-      const eased =
-        progress < 0.5
-          ? 2 * progress * progress
-          : 1 -
-            Math.pow(
-              -2 * progress + 2,
-              2
-            ) / 2;
-
-
-      carousel.scrollLeft =
-        startPosition +
-        distance * eased;
-
-
-      requestBlurUpdate();
-
-
-      if (progress < 1) {
-
-        autoScrollAnimation =
-          requestAnimationFrame(
-            animateAutoScroll
-          );
-
-      } else {
-
-        isAutoScrolling = false;
-
-        startAutoScroll();
-      }
-    }
-
-
-    autoScrollAnimation =
-      requestAnimationFrame(
-        animateAutoScroll
-      );
-
-  }, AUTO_DELAY);
 }
-
-
-startAutoScroll();
-
-});
