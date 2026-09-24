@@ -501,46 +501,45 @@ main {
 ========================================= */
 
 .other-projects {
-  margin-top: 140px;
-  padding-bottom: 100px;
+  margin-top: 100px;
+  padding: 0 var(--page-pad) 100px;
 }
 
 .other-projects .section-label {
-  margin-bottom: 68px;
+  display: block;
+  margin-bottom: 24px;
+  font-family: var(--sans);
 }
 
 .other-projects-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 10px;
+  column-gap: 10px;
   border-top: 1px solid var(--line);
 }
 
 .other-projects-grid a {
   display: grid;
   grid-template-columns: max-content minmax(0, 1fr);
+  align-items: start;
   column-gap: 12px;
-
+  min-width: 0;
   padding: 12px 0;
-
   border-bottom: 1px solid var(--line);
-
   font-family: var(--sans);
 }
 
 .other-projects-grid a span {
-  grid-column: 1;
-  grid-row: 1;
+  white-space: nowrap;
 }
 
 .other-projects-grid a strong {
-  grid-column: 2;
-  grid-row: 1;
-
+  min-width: 0;
   font-family: var(--serif);
-  font-size: 42px;
+  font-size: clamp(28px, 3vw, 42px);
   font-weight: 700;
   line-height: 1.1;
+  overflow-wrap: anywhere;
 }
 
 .other-projects-grid a:hover strong {
@@ -761,6 +760,23 @@ footer a:hover {
     width: 70%;
     max-height: 240px;
     scroll-snap-align: start;
+  }
+
+   .other-projects {
+    margin-top: 64px;
+    padding-bottom: 64px;
+  }
+
+  .other-projects .section-label {
+    margin-bottom: 16px;
+  }
+
+  .other-projects-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .other-projects-grid a strong {
+    font-size: 32px;
   }
 
 }
