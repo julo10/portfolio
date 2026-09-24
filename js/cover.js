@@ -1,81 +1,115 @@
-/**
- * cover.js
- * Scroll-driven "fan out" effect for cover artwork thumbnails.
- *
- * Usage:
- *   <script src="js/cover.js"></script>
- *   initCoverScatter('.project-covers .cover-preview');
- *
- * On the landing page this runs automatically for `.cover-preview`
- * (small, subtle version). On the covers project page you can call
- * initCoverScatter again with a different selector/options object
- * for a bigger, more extended version of the same effect.
- */
-
 function initCoverScatter(selector, options = {}) {
   const containers = document.querySelectorAll(selector);
   if (!containers.length) return;
 
   const prefersReducedMotion = window.matchMedia(
-    '(prefers-reduced-motion: reduce)'
+    "(prefers-reduced-motion: reduce)"
   ).matches;
+  const isSmallScreen = window.matchMedia("(max-width: 600px)").matches;
 
-  const isSmallScreen = window.matchMedia('(max-width: 600px)').matches;
-
-  // Default target transforms per image, at full scroll progress (1).
-  // x/y are % relative to the image's own size, r is rotation in deg.
-  // Alternates left/right so the fan opens outward from the middle.
   const defaultTargets = [
-    { x: -170, y: -8,  r: -9 },
-    { x: -70,  y: 12,  r: -4 },
-    { x: 0,    y: -22, r: 2  },
-    { x: 80,   y: 14,  r: 6  },
-    { x: 170,  y: -6,  r: 11 },
+    { x: -170, y: -8, r: -9 },
+    { x: -70, y: 12, r: -4 },
+    { x: 0, y: -22, r: 2 },
+    { x: 80, y: 14, r: 6 },
+    { x: 170, y: -6, r: 11 },
   ];
 
   const targets = options.targets || defaultTargets;
-  const scale = isSmallScreen ? (options.mobileScale ?? 0.45) : (options.scale ?? 1);
+  const scale = isSmallScreen
+    ? (options.mobileScale ?? 0.45)
+    : (options.scale ?? 1);
 
   containers.forEach((container) => {
-    const images = Array.from(container.querySelectorAll('img'));
+    const images = [...container.querySelectorAll("img")];
     if (!images.length) return;
 
-    if (prefersReducedMotion) {
-      // Leave images in their static, stacked CSS position — no motion.
-      return;
-    }
+    // Give each image a varied width and place the group close together.
+    const spread = Math.min(70, 14 * (images.length - 1));
+    const start = 50 - spread / 2;
+
+    images.forEach((img, index) => {
+      const position =
+        images.length === 1
+          ? 50
+          : start + (index / (images.length - 1)) * spread;
+
+      const minWidth = options.minImageWidth ?? 14;
+      const maxWidth = options.maxImageWidth ?? 20;
+      const variedWidth =
+        minWidth + Math.random() * (maxWidth - minWidth);
+  
+      img.style.left = `${position}%`;
+      img.style.width = `${variedWidth}%`;
+
+      function fitFanToImages() {
+        const motionScale = prefersReducedMotion ? 0 : scale;
+        const heights = images.map((img) => img.offsetHeight);
+
+        if (heights.some((height) => height === 0)) return;
+
+        const tallest = Math.max(...heights);
+        let spaceAbove = 0;
+        let spaceBelow = 0;
+
+        images.forEach((img, index) => {
+          const target = targets[index % targets.length];
+          const height = img.offsetHeight;
+          const verticalMove = (target.y * motionScale) / 100 * height;
+
+          spaceAbove = Math.max(spaceAbove, -verticalMove);
+          spaceBelow = Math.max(spaceBelow, verticalMove);
+        });
+
+        images.forEach((img) => {
+          img.style.top = `${spaceAbove}px`;
+        });
+
+        container.style.height =
+          `${Math.ceil(spaceAbove + tallest + spaceBelow)}px`;
+      }
+
+      requestAnimationFrame(fitFanToImages);
+
+      images.forEach((img) => {
+        img.addEventListener("load", fitFanToImages);
+      });
+
+      window.addEventListener("resize", fitFanToImages);
+
+    });
+
+    // Dragging and full-size previews are enabled for the large project page fans.
+    const isInteractive = container.classList.contains("cover-fan--lg");
 
     let ticking = false;
     let inView = false;
 
-    const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
-    // 0 -> section just entering the bottom of the viewport
-    // 1 -> section has fully passed the top of the viewport
     function getProgress() {
-      const rect = container.closest('.project') || container;
-      const box = rect.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const raw = (vh - box.top) / (vh + box.height);
+      const section = container.closest(".project") || container;
+      const box = section.getBoundingClientRect();
+      const raw = (window.innerHeight - box.top) /
+        (window.innerHeight + box.height);
+
       return clamp(raw, 0, 1);
     }
 
-    // Ease the raw scroll progress so the fan opens with a bit of
-    // acceleration in the middle rather than linearly.
-    function ease(t) {
-      return t * t * (3 - 2 * t); // smoothstep
+    function ease(value) {
+      return value * value * (3 - 2 * value);
     }
 
     function render() {
       ticking = false;
-      const progress = ease(getProgress());
+      const progress = prefersReducedMotion ? 0 : ease(getProgress());
 
-      images.forEach((img, i) => {
-        const t = targets[i % targets.length];
-        const x = t.x * progress * scale;
-        const y = t.y * progress * scale;
-        const r = t.r * progress * scale;
-        img.style.transform = `translate(${x}%, ${y}%) rotate(${r}deg)`;
+      images.forEach((img, index) => {
+        const target = targets[index % targets.length];
+
+        img.style.setProperty("--scroll-x", `${target.x * progress * scale}%`);
+        img.style.setProperty("--scroll-y", `${target.y * progress * scale}%`);
+        img.style.setProperty("--scroll-r", `${target.r * progress * scale}deg`);
       });
     }
 
@@ -85,35 +119,124 @@ function initCoverScatter(selector, options = {}) {
       requestAnimationFrame(render);
     }
 
-    // Only listen to scroll while the section is anywhere near the
-    // viewport — cheap when the user is elsewhere on a long page.
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           inView = entry.isIntersecting;
+
           if (inView) {
             render();
-            window.addEventListener('scroll', onScroll, { passive: true });
+            window.addEventListener("scroll", onScroll, { passive: true });
           } else {
-            window.removeEventListener('scroll', onScroll);
+            window.removeEventListener("scroll", onScroll);
           }
         });
       },
-      { rootMargin: '20% 0px 20% 0px' }
+      { rootMargin: "20% 0px 20% 0px" }
     );
 
-    observer.observe(container.closest('.project') || container);
+    observer.observe(container.closest(".project") || container);
 
-    // Re-render on resize (orientation change, devtools resize, etc.)
-    window.addEventListener('resize', () => {
-      if (inView) render();
-    });
-
-    // Set an initial frame in case the section is already in view on load.
+    window.addEventListener("resize", render);
     render();
+
+    if (!isInteractive) return;
+
+    images.forEach((img) => {
+      let startX = 0;
+      let startY = 0;
+      let dragX = 0;
+      let dragY = 0;
+      let moved = false;
+
+      img.addEventListener("pointerdown", (event) => {
+        if (event.pointerType === "mouse" && event.button !== 0) return;
+
+        startX = event.clientX;
+        startY = event.clientY;
+        moved = false;
+        img.classList.add("is-grabbed");
+        img.setPointerCapture(event.pointerId);
+      });
+
+      img.addEventListener("pointermove", (event) => {
+        if (!img.hasPointerCapture(event.pointerId)) return;
+
+        const dx = event.clientX - startX;
+        const dy = event.clientY - startY;
+
+        if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+        if (!moved) return;
+
+        dragX += dx;
+        dragY += dy;
+        startX = event.clientX;
+        startY = event.clientY;
+
+        img.style.setProperty("--drag-x", `${dragX}px`);
+        img.style.setProperty("--drag-y", `${dragY}px`);
+        img.style.zIndex = "20";
+      });
+
+      img.addEventListener("pointerup", (event) => {
+        img.classList.remove("is-grabbed");
+
+        if (moved) {
+          event.preventDefault();
+          event.stopPropagation();
+          img.dataset.justDragged = "true";
+          setTimeout(() => delete img.dataset.justDragged, 0);
+        }
+      });
+
+      img.addEventListener("pointercancel", () => {
+        img.classList.remove("is-grabbed");
+      });
+
+      img.addEventListener("click", (event) => {
+        if (img.dataset.justDragged === "true") {
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+
+        openCoverPreview(img);
+      });
+    });
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  initCoverScatter('.cover-fan:not(.cover-fan--lg)');
+
+function openCoverPreview(img) {
+  let dialog = document.querySelector("#cover-preview-dialog");
+
+  if (!dialog) {
+    dialog = document.createElement("dialog");
+    dialog.id = "cover-preview-dialog";
+    dialog.className = "cover-preview-dialog";
+    dialog.innerHTML = `
+      <button class="cover-preview-close" type="button" aria-label="Close preview">×</button>
+      <img class="cover-preview-full" alt="">
+    `;
+    document.body.append(dialog);
+
+    dialog.querySelector(".cover-preview-close").addEventListener("click", () => {
+      dialog.close();
+    });
+
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+  }
+
+  const previewImage = dialog.querySelector(".cover-preview-full");
+  previewImage.src = img.currentSrc || img.src;
+  previewImage.alt = img.alt;
+
+  if (!dialog.open) dialog.showModal();
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  initCoverScatter(".cover-fan:not(.cover-fan--lg)");
 });
