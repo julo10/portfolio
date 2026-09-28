@@ -128,44 +128,50 @@ carousels.forEach((carousel) => {
 
 
   carousel.addEventListener("pointerdown", (event) => {
-    if (event.pointerType === "mouse" && event.button !== 0) {
-      return;
-    }
+  if (event.pointerType === "mouse" && event.button !== 0) {
+    return;
+  }
 
-    clearTimeout(autoScrollTimer);
+  clearTimeout(autoScrollTimer);
 
-    if (autoScrollAnimation) {
-      cancelAnimationFrame(autoScrollAnimation);
-      autoScrollAnimation = null;
-    }
+  if (autoScrollAnimation) {
+    cancelAnimationFrame(autoScrollAnimation);
+    autoScrollAnimation = null;
+  }
 
-    isAutoScrolling = false;
+  isAutoScrolling = false;
+
+  isDragging = false;
+  hasDragged = false;
+
+  startX = event.clientX;
+  startScrollLeft = carousel.scrollLeft;
+});
+
+
+carousel.addEventListener("pointermove", (event) => {
+  const distance = event.clientX - startX;
+
+  // Don't treat a normal tap as a drag.
+  if (Math.abs(distance) <= DRAG_THRESHOLD) {
+    return;
+  }
+
+  // The user has actually started dragging.
+  if (!hasDragged) {
+    hasDragged = true;
     isDragging = true;
-    hasDragged = false;
-    startX = event.clientX;
-    startScrollLeft = carousel.scrollLeft;
 
     carousel.classList.add("is-dragging");
+
     carousel.setPointerCapture(event.pointerId);
+  }
 
-    // DO NOT call event.preventDefault() here.
-  });
+  carousel.scrollLeft = startScrollLeft - distance * 1.2;
 
-  carousel.addEventListener("pointermove", (event) => {
-    if (!isDragging) return;
-
-    const distance = event.clientX - startX;
-
-    if (Math.abs(distance) > DRAG_THRESHOLD) {
-      hasDragged = true;
-    }
-
-    if (!hasDragged) return;
-
-    carousel.scrollLeft = startScrollLeft - distance * 1.2;
-    requestBlurUpdate();
-    event.preventDefault();
-  });
+  requestBlurUpdate();
+  event.preventDefault();
+});
 
 
   function stopDragging(event) {
