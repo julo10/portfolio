@@ -179,38 +179,33 @@ if (cursor) {
   // TOUCH POSITION
   // =========================================
 
-  /*
-   * Some mobile browsers may not continuously
-   * dispatch pointermove during certain touch
-   * interactions, so also listen directly to touchmove.
-   */
+  document.addEventListener("touchstart", (e) => {
 
-  document.addEventListener("touchmove", (e) => {
+  if (!window.matchMedia("(pointer: coarse)").matches) return;
+  if (!e.touches.length) return;
 
-    if (!e.touches.length) return;
+  const touch = e.touches[0];
 
-    const touch = e.touches[0];
+  mouseX = touch.clientX;
+  mouseY = touch.clientY;
 
-    mouseX = touch.clientX;
-    mouseY = touch.clientY;
+  hasPointerMoved = true;
 
-    hasPointerMoved = true;
+  cursor.style.opacity = "1";
 
-    cursor.style.opacity = "1";
+  trail.forEach((item, index) => {
 
-    trail.forEach((item, index) => {
+    const progress = index / (TRAIL_COUNT - 1);
 
-      const progress = index / (TRAIL_COUNT - 1);
+    const opacity =
+      TRAIL_START_OPACITY +
+      (TRAIL_END_OPACITY - TRAIL_START_OPACITY) * progress;
 
-      const opacity =
-        TRAIL_START_OPACITY +
-        (TRAIL_END_OPACITY - TRAIL_START_OPACITY) * progress;
+    item.element.style.opacity = opacity;
 
-      item.element.style.opacity = opacity;
+  });
 
-    });
-
-  }, { passive: true });
+}, { passive: true });
 
 
   // =========================================
