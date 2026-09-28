@@ -127,7 +127,6 @@ carousels.forEach((carousel) => {
   }
 
 
-  // Drag the carousel with the mouse or pointer.
   carousel.addEventListener("pointerdown", (event) => {
     if (event.pointerType === "mouse" && event.button !== 0) {
       return;
@@ -148,9 +147,9 @@ carousels.forEach((carousel) => {
 
     carousel.classList.add("is-dragging");
     carousel.setPointerCapture(event.pointerId);
-    event.preventDefault();
-  });
 
+    // DO NOT call event.preventDefault() here.
+  });
 
   carousel.addEventListener("pointermove", (event) => {
     if (!isDragging) return;
