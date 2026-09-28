@@ -1,6 +1,6 @@
 const cursor = document.getElementById("cursor");
 
-if (cursor) {
+if (cursor && window.matchMedia("(pointer: fine)").matches) {
 
   const cursorImage = cursor.querySelector("img");
 
