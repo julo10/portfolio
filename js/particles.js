@@ -9,13 +9,13 @@
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const LIGHT_DOTS = [210, 210, 210];
   const DARK_DOTS = [112, 112, 112];
-  const BLACK = [0, 0, 0], GREY = [210, 210, 210];
+  const BLACK = [106, 255, 106], GREY = [210, 210, 210];
   const INK = [17, 17, 17];
   const pointer = { x: -1000, y: -1000, active: false, pressed: false };
   let width = 0, height = 0, dpr = 1, particles = [], raf = 0, lastTime = 0;
   let targetProgress = 0, visualProgress = 0;
   const spacing = () => window.innerWidth < 700 ? 36 : 38;
-  const dotRadius = 9;
+  const dotRadius = 17;
 
   function resize() {
     const rect = hero.getBoundingClientRect();
@@ -47,7 +47,7 @@
         const oy = y + (Math.random() - .5) * 5;
         particles.push({ ox, oy, x: ox, y: oy, vx: 0, vy: 0,
           r: dotRadius, alpha: .78 + Math.random() * .22,
-          fallFactor: .75 + Math.random() * .5 });
+          fallFactor: 1.75 + Math.random() * 3 });
       }
     }
   }
@@ -95,27 +95,27 @@
     updateBackground(progress);
     const dotColor = mixColor(LIGHT_DOTS, DARK_DOTS, progress);
     /* Let the dots fall through the transition, then fade them completely away. */
-    const dotFade = Math.pow(Math.max(0, 1 - progress), 1.35);
+    const dotFade = Math.pow(Math.max(0, 1 - progress), .35);
 
     for (const p of particles) {
       const targetX = p.ox;
       /* Dots drift downward with scroll, continuing beyond the intro. */
       const targetY = p.oy + progress * (hero.offsetHeight * .95) * p.fallFactor;
       if (!reducedMotion) {
-        p.vx += (targetX - p.x) * .045;
-        p.vy += (targetY - p.y) * .045;
-        p.vy += progress * 0.12 * p.fallFactor;
+        p.vx += (targetX - p.x) * .065;
+        p.vy += (targetY - p.y) * 0.005;
+        p.vy += progress * 0.06 * p.fallFactor;
         if (pointer.active && progress < .98) {
           const dx = p.x - pointer.x, dy = p.y - pointer.y;
           const distance = Math.hypot(dx, dy) || .001;
           if (distance < influenceRadius) {
-            const force = (1 - distance / influenceRadius) * (pointer.pressed ? 2.1 : 1);
-            p.vx += (dx / distance) * force;
-            p.vy += (dy / distance) * force;
+            const force = (1 - distance / influenceRadius) * (pointer.pressed ? 2.4 : 1.5);
+            p.vx += (dx / distance) * force * 0.45;
+            p.vy += ((dy / distance) * force + 0.5);
           }
         }
-        p.vx *= .82;
-        p.vy *= .82;
+        p.vx *= .84;
+        p.vy *= .94;
         p.x += p.vx;
         p.y += p.vy;
       } else {
